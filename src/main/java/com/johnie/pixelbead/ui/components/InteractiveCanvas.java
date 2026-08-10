@@ -108,6 +108,8 @@ public class InteractiveCanvas extends Canvas {
                 if (highlightIndex.get() < 0 && previewFrom.get() < 0) {
                     stop();
                     animStart = -1;
+                    // Repaint once more so the last highlighted frame is cleared.
+                    redraw();
                     return;
                 }
                 if (animStart < 0) {
