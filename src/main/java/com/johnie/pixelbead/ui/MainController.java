@@ -8,6 +8,7 @@ import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
 import com.johnie.pixelbead.engine.renderer.PatternExporter;
 import com.johnie.pixelbead.ui.components.InteractiveCanvas;
+import com.johnie.pixelbead.ui.dialogs.CropDialog;
 import com.johnie.pixelbead.ui.state.AppState;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -46,6 +47,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.List;
 
 /**
@@ -456,7 +458,11 @@ public class MainController {
             if (image == null) {
                 throw new IOException("Unsupported or corrupted image");
             }
-            sourceImage = image;
+            Optional<BufferedImage> cropped = CropDialog.show(image, importButton.getScene().getWindow());
+            if (cropped.isEmpty()) {
+                return; // user cancelled the crop
+            }
+            sourceImage = cropped.get();
             regenerate();
         } catch (IOException e) {
             showError("Failed to load image", file.getName() + System.lineSeparator() + e.getMessage());

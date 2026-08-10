@@ -321,6 +321,12 @@
     -fx-font-size: 11px;
 }
 
+/* ---------- crop dialog ---------- */
+
+.crop-dialog {
+    -fx-background-color: -pixel-panel;
+}
+
 /* ---------- app layout ---------- */
 
 .side-panel {
