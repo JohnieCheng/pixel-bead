@@ -20,6 +20,8 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import javax.imageio.ImageIO;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -60,9 +62,24 @@ public final class CropDialog {
         double dispW = srcW * scale;
         double dispH = srcH * scale;
 
+        // Preview only: downscale large sources to the display size so the
+        // temp PNG encodes/decodes in milliseconds. The crop coordinates are
+        // mapped back to the full-resolution source by ratio, so precision is
+        // unaffected.
+        BufferedImage preview;
+        if (scale < 1) {
+            preview = new BufferedImage((int) Math.round(dispW), (int) Math.round(dispH), BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = preview.createGraphics();
+            g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(source, 0, 0, preview.getWidth(), preview.getHeight(), null);
+            g.dispose();
+        } else {
+            preview = source;
+        }
+
         File tmp = File.createTempFile("pixelbead-crop", ".png");
         tmp.deleteOnExit();
-        ImageIO.write(source, "png", tmp);
+        ImageIO.write(preview, "png", tmp);
         Image fxImage = new Image(tmp.toURI().toString());
 
         ImageView imageView = new ImageView(fxImage);
