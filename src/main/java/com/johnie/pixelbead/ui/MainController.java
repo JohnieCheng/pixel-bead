@@ -591,7 +591,7 @@ public class MainController {
         task.setOnRunning(e -> showOverlay());
         task.setOnSucceeded(e -> {
             hideOverlay();
-            showInfo("Export complete", "Saved to " + file.getAbsolutePath());
+            showToast("Saved to " + file.getName());
         });
         task.setOnFailed(e -> {
             hideOverlay();
@@ -613,16 +613,29 @@ public class MainController {
         loadingOverlay.setManaged(false);
     }
 
-    private void showError(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void showToast(String message) {
+        Label toast = new Label(message);
+        toast.getStyleClass().add("toast");
+        Node center = canvas.getParent();
+        if (center instanceof javafx.scene.layout.StackPane stack) {
+            stack.getChildren().add(toast);
+            javafx.scene.layout.StackPane.setAlignment(toast, javafx.geometry.Pos.BOTTOM_RIGHT);
+            javafx.scene.layout.StackPane.setMargin(toast, new javafx.geometry.Insets(0, 16, 16, 0));
+            toast.setOpacity(0);
+            javafx.animation.FadeTransition in = new javafx.animation.FadeTransition(javafx.util.Duration.millis(200), toast);
+            in.setToValue(1);
+            javafx.animation.PauseTransition hold = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(2.5));
+            javafx.animation.FadeTransition out = new javafx.animation.FadeTransition(javafx.util.Duration.millis(300), toast);
+            out.setToValue(0);
+            out.setOnFinished(e -> stack.getChildren().remove(toast));
+            in.setOnFinished(e -> hold.play());
+            hold.setOnFinished(e -> out.play());
+            in.play();
+        }
     }
 
-    private void showInfo(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+    private void showError(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);

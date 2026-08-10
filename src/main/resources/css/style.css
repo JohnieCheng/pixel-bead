@@ -327,6 +327,17 @@
     -fx-background-color: -pixel-panel;
 }
 
+/* ---------- toast ---------- */
+
+.toast {
+    -fx-background-color: -pixel-elevated;
+    -fx-text-fill: -pixel-text;
+    -fx-background-radius: 8;
+    -fx-padding: 10 16 10 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 12, 0, 0, 3);
+    -fx-font-size: 12px;
+}
+
 /* ---------- app layout ---------- */
 
 .side-panel {
