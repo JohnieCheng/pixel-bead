@@ -45,7 +45,6 @@ public class InteractiveCanvas extends Canvas {
     private double lastX;
     private double lastY;
     private boolean spaceDown = false;
-    private boolean fitted = false;
 
     public InteractiveCanvas() {
         // Canvas is not Resizable; containers never stretch it. Bind our size
@@ -77,9 +76,12 @@ public class InteractiveCanvas extends Canvas {
         setOnMouseExited(e -> hoverInfo.set(""));
     }
 
-    /** Fits once the first real size arrives; afterwards keep the user's zoom. */
+    /** Re-fits on every size change so the pattern follows window resizes live. */
     private void onSizeChanged() {
-        if (!fitted && project.get() != null && getWidth() > 0 && getHeight() > 0) {
+        if (getWidth() <= 0 || getHeight() <= 0) {
+            return;
+        }
+        if (project.get() != null) {
             fitToView();
         } else {
             redraw();
@@ -92,6 +94,32 @@ public class InteractiveCanvas extends Canvas {
 
     public ObjectProperty<String> hoverInfoProperty() {
         return hoverInfo;
+    }
+
+    /**
+     * Canvas reports its current size as its layout min/pref (Node default),
+     * which would pin the parent container's minimum size to the viewport.
+     * Report 0 so the window can shrink freely; the canvas size is bound to
+     * the parent region instead of relying on layout.
+     */
+    @Override
+    public double minWidth(double height) {
+        return 0;
+    }
+
+    @Override
+    public double minHeight(double width) {
+        return 0;
+    }
+
+    @Override
+    public double prefWidth(double height) {
+        return 0;
+    }
+
+    @Override
+    public double prefHeight(double width) {
+        return 0;
     }
 
     /** Test hook: current pixels-per-cell scale. */
@@ -114,7 +142,6 @@ public class InteractiveCanvas extends Canvas {
         scale = Math.min(w / p.board().columns(), h / p.board().rows());
         offsetX = (w - p.board().columns() * scale) / 2.0;
         offsetY = (h - p.board().rows() * scale) / 2.0;
-        fitted = true;
         redraw();
     }
 

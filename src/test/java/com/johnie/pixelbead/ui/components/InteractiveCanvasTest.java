@@ -86,6 +86,36 @@ class InteractiveCanvasTest {
         assertTrue(scale.get() > 0, "canvas never fitted the project");
     }
 
+    @Test
+    void fitFollowsShrinkingParent() throws Exception {
+        // Regression: shrinking the window must re-fit the pattern too.
+        PatternProject project = smallProject();
+        AtomicReference<Double> bigScale = new AtomicReference<>(0.0);
+        AtomicReference<Double> smallScale = new AtomicReference<>(0.0);
+        CountDownLatch latch = new CountDownLatch(1);
+
+        runOnFx(() -> {
+            StackPane pane = new StackPane();
+            InteractiveCanvas canvas = new InteractiveCanvas();
+            pane.getChildren().add(canvas);
+            pane.resize(800, 600);
+            pane.layout();
+            canvas.projectProperty().set(project);
+            Platform.runLater(() -> {
+                bigScale.set(canvas.getScaleForTest());
+                pane.resize(400, 300);
+                pane.layout();
+                Platform.runLater(() -> {
+                    smallScale.set(canvas.getScaleForTest());
+                    latch.countDown();
+                });
+            });
+        });
+        assertTrue(latch.await(10, TimeUnit.SECONDS), "shrink fit timed out");
+        assertTrue(bigScale.get() > smallScale.get(),
+                "scale did not shrink with the parent: " + bigScale.get() + " -> " + smallScale.get());
+    }
+
     /** Runs a task on the FX thread and waits for the given latch to be counted. */
     private static void runOnFx(Runnable task) throws InterruptedException {
         CountDownLatch done = new CountDownLatch(1);
