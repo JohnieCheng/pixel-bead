@@ -8,6 +8,7 @@
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.ToolBar?>
@@ -37,6 +38,16 @@
             </padding>
             <Label styleClass="panel-title" text="Board"/>
             <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>
+            <VBox fx:id="customBoardPane" spacing="6" visible="false" managed="false">
+                <Label text="Columns"/>
+                <Spinner fx:id="columnsSpinner" editable="true" maxWidth="Infinity"/>
+                <Label text="Rows"/>
+                <Spinner fx:id="rowsSpinner" editable="true" maxWidth="Infinity"/>
+                <Label text="Bead size (mm)"/>
+                <Spinner fx:id="beadSizeSpinner" editable="true" maxWidth="Infinity"/>
+                <Label text="Sub-grid interval"/>
+                <Spinner fx:id="subGridSpinner" editable="true" maxWidth="Infinity"/>
+            </VBox>
             <Label text="Boards (W x H)"/>
             <HBox spacing="6">
                 <ComboBox fx:id="boardColsCombo" prefWidth="72"/>
