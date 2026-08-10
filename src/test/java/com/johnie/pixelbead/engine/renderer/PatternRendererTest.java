@@ -41,6 +41,16 @@ class PatternRendererTest {
     }
 
     @Test
+    void legendHeaderHasGapBelowIt() {
+        // The first legend swatch must start below the "Bead Count" header text.
+        BufferedImage img = PatternRenderer.render(project, 24);
+        int legendY = 36 + 3 * 24 + 24;
+        // One pixel below the old swatch area: plain white background, no swatch
+        // colour and no header text (header descends to ~legendY - 4).
+        assertEquals(0xFFFFFF, img.getRGB(36 + 2, legendY - 1) & 0xFFFFFF);
+    }
+
+    @Test
     void cellCornersMatchPaletteColor() {
         BufferedImage img = PatternRenderer.render(project, 24);
         // Cell (1,1) holds palette index 5. Sample the four corners (the

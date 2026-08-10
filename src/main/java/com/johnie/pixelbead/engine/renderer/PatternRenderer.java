@@ -174,13 +174,17 @@ public final class PatternRenderer {
         BeadPalette palette = project.palette();
         g.setColor(AXIS_TEXT);
         g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 12));
-        int legendY = AXIS_MARGIN + project.board().rows() * cellSize + 16;
+        // Header baseline sits clear of the grid bottom by the font ascent
+        // (the text top must not touch the last grid row).
+        int legendY = AXIS_MARGIN + project.board().rows() * cellSize + 24;
         g.drawString("Bead Count", AXIS_MARGIN, legendY - 8);
         g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         FontMetrics fm = g.getFontMetrics();
 
         int x = AXIS_MARGIN;
-        int y = legendY;
+        // Leave room below the "Bead Count" header so the first legend row's
+        // swatches never overlap the header text (dark swatches used to cover it).
+        int y = legendY + 16;
         int perLine = 0;
         for (int i = 0; i < counts.length; i++) {
             if (counts[i] == 0) {
