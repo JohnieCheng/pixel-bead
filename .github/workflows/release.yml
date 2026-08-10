@@ -1,0 +1,118 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: macos-latest
+            suffix: macos-arm64
+            type: dmg
+          - platform: windows-latest
+            suffix: windows-x64
+            type: exe
+
+    runs-on: ${{ matrix.platform }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Run tests
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            ./mvnw.cmd test
+          else
+            ./mvnw test
+          fi
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            V=$(./mvnw -q help:evaluate -Dexpression=project.version -DforceStdout | tail -1)
+            echo "version=$V" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build macOS dmg (ad-hoc signed)
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          ./build-mac.sh app-image
+          # Ad-hoc sign the app bundle (required on Apple Silicon), then
+          # repackage it into the final dmg from the signed app-image.
+          codesign --force --deep --sign - "target/dist/Pixel Bead.app"
+          "$JAVA_HOME/bin/jpackage" --type dmg \
+            --app-image "target/dist/Pixel Bead.app" \
+            --name "Pixel Bead" \
+            --app-version ${{ steps.version.outputs.version }} \
+            --icon src/main/resources/icons/pixel-bead.icns \
+            --dest target/dist-signed
+
+      - name: Build Windows packages (installer + portable)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: build-win.bat all ${{ steps.version.outputs.version }}
+
+      - name: Normalize asset names
+        shell: bash
+        run: |
+          ASSETS="$RUNNER_TEMP/assets"
+          mkdir -p "$ASSETS"
+          NAME="pixel-bead"
+          TAG="${{ github.ref_name }}"
+          SUFFIX="${{ matrix.suffix }}"
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            EXE=$(ls target/dist/*.exe | head -1)
+            cp "$EXE" "$ASSETS/${NAME}-${TAG}-${SUFFIX}.exe"
+            cp target/dist/pixel-bead-portable.zip "$ASSETS/${NAME}-${TAG}-${SUFFIX}-portable.zip"
+          else
+            SRC=$(ls target/dist-signed/*.dmg | head -1)
+            EXT="${SRC##*.}"
+            cp "$SRC" "$ASSETS/${NAME}-${TAG}-${SUFFIX}.${EXT}"
+          fi
+          echo "ASSETS=$ASSETS" >> "$GITHUB_ENV"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pixel-bead-${{ matrix.suffix }}
+          path: ${{ env.ASSETS }}/*
+
+      - name: Upload to Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Pixel Bead ${{ github.ref_name }}
+          body: |
+            | Platform | Arch |
+            |----------|------|
+            | macOS | ARM64 |
+            | Windows | x64 |
+
+            **Full Changelog**: https://github.com/${{ github.repository }}/commits/${{ github.ref_name }}
+          draft: true
+          files: ${{ env.ASSETS }}/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,303 @@
+/* ============================================================
+   Pixel Bead — One Dark theme
+   ============================================================ */
+
+.root {
+    -fx-base: #232830;
+    -fx-background: #1E2228;
+    -fx-control-inner-background: #232830;
+    -fx-control-inner-background-alt: #20242B;
+    -fx-text-base-color: #D8DEE9;
+    -fx-text-fill: #D8DEE9;
+    -fx-text-background-color: #D8DEE9;
+    -fx-accent: #61AFEF;
+    -fx-focus-color: #61AFEF;
+    -fx-faint-focus-color: transparent;
+    -fx-selection-bar: #2B303B;
+    -fx-selection-bar-non-focused: #2B303B;
+    -fx-background-radius: 6;
+    -fx-background-insets: 0;
+}
+
+/* ---------- labels & generic text ---------- */
+
+.label {
+    -fx-text-fill: #D8DEE9;
+}
+
+/* ---------- toolbar ---------- */
+
+.tool-bar {
+    -fx-background-color: #232830;
+    -fx-border-color: transparent transparent #2E333D transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 6 12 6 12;
+}
+
+/* ---------- buttons ---------- */
+
+.button {
+    -fx-background-color: #2B303B;
+    -fx-background-radius: 6;
+    -fx-border-color: #3A3F4B;
+    -fx-border-radius: 6;
+    -fx-text-fill: #D8DEE9;
+    -fx-padding: 5 14 5 14;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #333945;
+}
+
+.button:pressed {
+    -fx-background-color: #20242B;
+}
+
+.button:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+/* ---------- combo box ---------- */
+
+.combo-box {
+    -fx-background-color: #2B303B;
+    -fx-background-radius: 6;
+    -fx-border-color: #3A3F4B;
+    -fx-border-radius: 6;
+    -fx-text-fill: #D8DEE9;
+    -fx-padding: 2 4 2 4;
+}
+
+.combo-box:hover {
+    -fx-background-color: #333945;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #D8DEE9;
+    -fx-padding: 3 8 3 8;
+}
+
+.combo-box .arrow-button {
+    -fx-background-color: transparent;
+}
+
+.combo-box .arrow {
+    -fx-background-color: #9AA2B0;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #232830;
+    -fx-background-radius: 6;
+    -fx-border-color: #3A3F4B;
+    -fx-border-radius: 6;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 0, 4);
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #D8DEE9;
+    -fx-padding: 6 10 6 10;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #2B303B;
+}
+
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #333945;
+}
+
+/* ---------- table view ---------- */
+
+.table-view {
+    -fx-background-color: #232830;
+    -fx-background-radius: 6;
+    -fx-border-color: #2E333D;
+    -fx-border-radius: 6;
+    -fx-padding: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #262B34;
+    -fx-background-radius: 6 6 0 0;
+    -fx-border-color: transparent transparent #2E333D transparent;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-size: 32;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #9AA2B0;
+    -fx-font-size: 11px;
+}
+
+.table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent #262B34 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-row-cell:hover {
+    -fx-background-color: #2B303B;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #313B47;
+}
+
+.table-row-cell .label {
+    -fx-text-fill: #D8DEE9;
+}
+
+.table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 4 8 4 8;
+}
+
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal {
+    -fx-pref-width: 10;
+    -fx-pref-height: 10;
+}
+
+/* ---------- scroll bars ---------- */
+
+.scroll-bar {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #3A3F4B;
+    -fx-background-radius: 5;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #4A5160;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ---------- scroll pane ---------- */
+
+.scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ---------- split / separators ---------- */
+
+.separator .line {
+    -fx-border-color: #2E333D transparent transparent transparent;
+}
+
+/* ---------- progress indicator ---------- */
+
+.progress-indicator {
+    -fx-progress-color: #61AFEF;
+}
+
+/* ---------- dialogs ---------- */
+
+.dialog-pane {
+    -fx-background-color: #232830;
+    -fx-border-color: #3A3F4B;
+    -fx-border-width: 1;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #232830;
+}
+
+.dialog-pane .content.label {
+    -fx-text-fill: #D8DEE9;
+}
+
+.dialog-pane .button-bar .container {
+    -fx-background-color: #232830;
+}
+
+/* ---------- tooltip ---------- */
+
+.tooltip {
+    -fx-background-color: #2B303B;
+    -fx-text-fill: #D8DEE9;
+    -fx-background-radius: 4;
+    -fx-font-size: 11px;
+}
+
+/* ---------- app layout ---------- */
+
+.side-panel {
+    -fx-background-color: #232830;
+    -fx-border-color: #2E333D;
+    -fx-border-width: 0 1 0 0;
+}
+
+.side-panel .label {
+    -fx-text-fill: #D8DEE9;
+}
+
+.panel-title {
+    -fx-font-weight: bold;
+    -fx-text-fill: #D8DEE9;
+    -fx-font-size: 12px;
+}
+
+.pattern-info {
+    -fx-text-fill: #9AA2B0;
+    -fx-font-size: 12px;
+}
+
+.status-bar {
+    -fx-background-color: #232830;
+    -fx-border-color: #2E333D;
+    -fx-border-width: 1 0 0 0;
+}
+
+.status-bar .label {
+    -fx-text-fill: #9AA2B0;
+    -fx-font-size: 12px;
+}
+
+.palette-scroll {
+    -fx-background-color: transparent;
+}
+
+.palette-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.loading-overlay {
+    -fx-background-color: rgba(30, 34, 40, 0.72);
+}
+
+.loading-overlay .label {
+    -fx-text-fill: #D8DEE9;
+}

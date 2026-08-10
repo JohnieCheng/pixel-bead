@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.johnie.pixelbead.ui.components.InteractiveCanvas?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.johnie.pixelbead.ui.MainController"
+            prefWidth="1280" prefHeight="800">
+    <top>
+        <ToolBar>
+            <Button fx:id="importButton" text="Import Image" onAction="#onImportImage"/>
+            <Separator/>
+            <ComboBox fx:id="formatCombo" prefWidth="90"/>
+            <Button fx:id="exportButton" text="Export" onAction="#onExport" disable="true"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Fit View" onAction="#onFitView"/>
+        </ToolBar>
+    </top>
+    <left>
+        <VBox styleClass="side-panel" spacing="8" prefWidth="230">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+            <Label styleClass="panel-title" text="Board"/>
+            <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>
+            <Label text="Boards (W x H)"/>
+            <HBox spacing="6">
+                <ComboBox fx:id="boardColsCombo" prefWidth="72"/>
+                <Label text="x"/>
+                <ComboBox fx:id="boardRowsCombo" prefWidth="72"/>
+            </HBox>
+            <Label text="Interpolation"/>
+            <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
+            <Separator/>
+            <Label styleClass="panel-title" text="Pattern"/>
+            <Label fx:id="patternInfoLabel" wrapText="true" styleClass="pattern-info"/>
+        </VBox>
+    </left>
+    <right>
+        <VBox styleClass="side-panel" spacing="8" prefWidth="250">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+            <Label styleClass="panel-title" text="Palette"/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="palette-scroll">
+                <FlowPane fx:id="palettePane" hgap="4" vgap="4"/>
+            </ScrollPane>
+            <Label styleClass="panel-title" text="Bead Count"/>
+            <TableView fx:id="countTable" VBox.vgrow="ALWAYS" prefHeight="240">
+                <columns>
+                    <TableColumn fx:id="codeColumn" text="Code" prefWidth="80"/>
+                    <TableColumn fx:id="swatchColumn" text="Color" prefWidth="60"/>
+                    <TableColumn fx:id="countColumn" text="Beads" prefWidth="70"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </right>
+    <bottom>
+        <HBox styleClass="status-bar" spacing="16">
+            <padding>
+                <Insets top="6" right="12" bottom="6" left="12"/>
+            </padding>
+            <Label fx:id="hoverLabel" text=""/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="boardSizeLabel" text=""/>
+        </HBox>
+    </bottom>
+    <center>
+        <StackPane>
+            <InteractiveCanvas fx:id="canvas"/>
+            <StackPane fx:id="loadingOverlay" styleClass="loading-overlay" visible="false" managed="false">
+                <VBox alignment="CENTER" spacing="12">
+                    <ProgressIndicator/>
+                    <Label text="Converting..."/>
+                </VBox>
+            </StackPane>
+        </StackPane>
+    </center>
+</BorderPane>
