@@ -98,6 +98,8 @@ public class MainController {
     @FXML
     private Button themeButton;
     @FXML
+    private ToggleButton previewButton;
+    @FXML
     private BorderPane root;
     @FXML
     private VBox customBoardPane;
@@ -532,6 +534,11 @@ public class MainController {
                     new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), this::redo);
             scene.getAccelerators().put(
                     new KeyCodeCombination(KeyCode.ESCAPE), this::cancelReplaceMode);
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.P), () -> {
+                        previewButton.setSelected(!previewButton.isSelected());
+                        onTogglePreview();
+                    });
         });
     }
 
@@ -581,6 +588,11 @@ public class MainController {
                 ? AppState.Theme.LIGHT
                 : AppState.Theme.DARK;
         state.themeProperty().set(next);
+    }
+
+    @FXML
+    private void onTogglePreview() {
+        canvas.setPreviewMode(previewButton.isSelected());
     }
 
     private void setupTheme() {

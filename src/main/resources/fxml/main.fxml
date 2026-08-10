@@ -29,6 +29,7 @@
             <Button fx:id="exportButton" text="Export" onAction="#onExport" disable="true"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Fit View" onAction="#onFitView"/>
+            <ToggleButton fx:id="previewButton" text="Preview" onAction="#onTogglePreview"/>
             <Button fx:id="themeButton" text="Dark" onAction="#onToggleTheme"/>
         </ToolBar>
     </top>

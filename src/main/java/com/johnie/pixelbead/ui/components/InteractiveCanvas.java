@@ -69,6 +69,9 @@ public class InteractiveCanvas extends Canvas {
     private final IntegerProperty previewTo = new SimpleIntegerProperty(-1);
     private long animStart = -1;
 
+    /** When true, grid lines and border are hidden for a finished-bead look. */
+    private boolean previewMode = false;
+
     public InteractiveCanvas() {
         // Canvas is not Resizable; containers never stretch it. Bind our size
         // to the parent region so the drawing surface follows the layout.
@@ -252,34 +255,40 @@ public class InteractiveCanvas extends Canvas {
         }
 
         // grid lines
-        gc.setStroke(cellLine);
-        gc.setLineWidth(0.5);
-        for (int x = x0; x <= x1; x++) {
-            double px = offsetX + x * scale;
-            gc.strokeLine(px, 0, px, h);
-        }
-        for (int y = y0; y <= y1; y++) {
-            double py = offsetY + y * scale;
-            gc.strokeLine(0, py, w, py);
+        if (!previewMode) {
+            gc.setStroke(cellLine);
+            gc.setLineWidth(0.5);
+            for (int x = x0; x <= x1; x++) {
+                double px = offsetX + x * scale;
+                gc.strokeLine(px, 0, px, h);
+            }
+            for (int y = y0; y <= y1; y++) {
+                double py = offsetY + y * scale;
+                gc.strokeLine(0, py, w, py);
+            }
         }
 
         // Bold sub-grid lines.
-        int interval = board.subGridInterval();
-        gc.setStroke(subGridLine);
-        gc.setLineWidth(1.2);
-        for (int x = 0; x <= cols; x += interval) {
-            double px = offsetX + x * scale;
-            gc.strokeLine(px, 0, px, h);
-        }
-        for (int y = 0; y <= rows; y += interval) {
-            double py = offsetY + y * scale;
-            gc.strokeLine(0, py, w, py);
+        if (!previewMode) {
+            int interval = board.subGridInterval();
+            gc.setStroke(subGridLine);
+            gc.setLineWidth(1.2);
+            for (int x = 0; x <= cols; x += interval) {
+                double px = offsetX + x * scale;
+                gc.strokeLine(px, 0, px, h);
+            }
+            for (int y = 0; y <= rows; y += interval) {
+                double py = offsetY + y * scale;
+                gc.strokeLine(0, py, w, py);
+            }
         }
 
         // outer border
-        gc.setStroke(border);
-        gc.setLineWidth(1.5);
-        gc.strokeRect(offsetX, offsetY, cols * scale, rows * scale);
+        if (!previewMode) {
+            gc.setStroke(border);
+            gc.setLineWidth(1.5);
+            gc.strokeRect(offsetX, offsetY, cols * scale, rows * scale);
+        }
 
         drawHighlightOverlay(gc, p);
     }
@@ -316,6 +325,14 @@ public class InteractiveCanvas extends Canvas {
                     gc.strokeRect(px - 1, py - 1, scale + 2, scale + 2);
                 }
             }
+        }
+    }
+
+    /** Toggles finished-bead preview (grid lines hidden). */
+    public void setPreviewMode(boolean preview) {
+        if (previewMode != preview) {
+            previewMode = preview;
+            redraw();
         }
     }
 
