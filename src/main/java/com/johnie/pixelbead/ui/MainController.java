@@ -25,6 +25,7 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -68,6 +69,10 @@ public class MainController {
     private InteractiveCanvas canvas;
     @FXML
     private ComboBox<String> boardCombo;
+    @FXML
+    private Button themeButton;
+    @FXML
+    private BorderPane root;
     @FXML
     private VBox customBoardPane;
     @FXML
@@ -122,6 +127,7 @@ public class MainController {
         setupCountTable();
         setupPalettePane();
         setupExportControls();
+        setupTheme();
 
         canvas.projectProperty().bind(state.currentProjectProperty());
         hoverLabel.textProperty().bind(canvas.hoverInfoProperty());
@@ -280,18 +286,43 @@ public class MainController {
     private void setupPalettePane() {
         BeadPalette palette = state.paletteProperty().get();
         palettePane.getChildren().clear();
-        for (BeadColor color : palette.colors()) {
+        for (int i = 0; i < palette.size(); i++) {
+            BeadColor color = palette.colorAt(i);
             Rectangle swatch = new Rectangle(SWATCH_SIZE, SWATCH_SIZE);
             swatch.setFill(Color.rgb(color.r(), color.g(), color.b()));
-            swatch.setStroke(Color.web("#cccccc"));
+            swatch.setStroke(Color.web("#3A3F4B"));
+            swatch.setStrokeWidth(1);
             Tooltip.install(swatch, new Tooltip(color.code()));
             palettePane.getChildren().add(swatch);
         }
     }
 
+
     @FXML
     private void onFitView() {
         canvas.fitToView();
+    }
+
+    @FXML
+    private void onToggleTheme() {
+        AppState.Theme next = state.themeProperty().get() == AppState.Theme.DARK
+                ? AppState.Theme.LIGHT
+                : AppState.Theme.DARK;
+        state.themeProperty().set(next);
+    }
+
+    private void setupTheme() {
+        applyThemeClass();
+        themeButton.setText(state.themeProperty().get() == AppState.Theme.DARK ? "Dark" : "Light");
+        state.themeProperty().addListener((obs, old, theme) -> {
+            applyThemeClass();
+            themeButton.setText(theme == AppState.Theme.DARK ? "Dark" : "Light");
+        });
+    }
+
+    private void applyThemeClass() {
+        root.getStyleClass().removeAll("theme-dark", "theme-light");
+        root.getStyleClass().add(state.themeProperty().get() == AppState.Theme.DARK ? "theme-dark" : "theme-light");
     }
 
     @FXML

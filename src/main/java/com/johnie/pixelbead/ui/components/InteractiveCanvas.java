@@ -4,6 +4,7 @@ import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
+import com.johnie.pixelbead.ui.state.AppState;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.canvas.Canvas;
@@ -28,12 +29,19 @@ public class InteractiveCanvas extends Canvas {
     private static final double MAX_SCALE = 64.0;
     private static final double ZOOM_STEP = 1.15;
 
-    // One Dark palette (matches css/style.css).
-    private static final Color BACKGROUND = Color.web("#1E2228");
-    private static final Color CELL_LINE = Color.web("#2B303B");
-    private static final Color SUB_GRID_LINE = Color.web("#3A3F4B");
-    private static final Color BORDER = Color.web("#565C6A");
-    private static final Color EMPTY_HINT = Color.web("#9AA2B0");
+    // Theme colors (kept in sync with css/style.css).
+    private static final Color[] DARK = {
+            Color.web("#1E2228"), Color.web("#2B303B"), Color.web("#3A3F4B"), Color.web("#565C6A"), Color.web("#9AA2B0")
+    };
+    private static final Color[] LIGHT = {
+            Color.web("#F5F6F8"), Color.web("#E3E6EA"), Color.web("#C9D1D9"), Color.web("#9AA4AF"), Color.web("#59636E")
+    };
+
+    private Color bg = DARK[0];
+    private Color cellLine = DARK[1];
+    private Color subGridLine = DARK[2];
+    private Color border = DARK[3];
+    private Color emptyHint = DARK[4];
 
     private final ObjectProperty<PatternProject> project = new SimpleObjectProperty<>();
     private final ObjectProperty<String> hoverInfo = new SimpleObjectProperty<>("");
@@ -45,6 +53,8 @@ public class InteractiveCanvas extends Canvas {
     private double lastX;
     private double lastY;
     private boolean spaceDown = false;
+
+    private final AppState state = AppState.get();
 
     public InteractiveCanvas() {
         // Canvas is not Resizable; containers never stretch it. Bind our size
@@ -74,6 +84,19 @@ public class InteractiveCanvas extends Canvas {
         setOnMouseDragged(this::handleDragged);
         setOnMouseMoved(this::handleMoved);
         setOnMouseExited(e -> hoverInfo.set(""));
+        // Theme switch repaints the canvas with the matching palette.
+        state.themeProperty().addListener((obs, old, theme) -> applyTheme(theme));
+        applyTheme(state.themeProperty().get());
+    }
+
+    private void applyTheme(AppState.Theme theme) {
+        Color[] palette = theme == AppState.Theme.LIGHT ? LIGHT : DARK;
+        bg = palette[0];
+        cellLine = palette[1];
+        subGridLine = palette[2];
+        border = palette[3];
+        emptyHint = palette[4];
+        redraw();
     }
 
     /** Re-fits on every size change so the pattern follows window resizes live. */
@@ -149,12 +172,12 @@ public class InteractiveCanvas extends Canvas {
         double w = getWidth();
         double h = getHeight();
         GraphicsContext gc = getGraphicsContext2D();
-        gc.setFill(BACKGROUND);
+        gc.setFill(bg);
         gc.fillRect(0, 0, w, h);
 
         PatternProject p = project.get();
         if (p == null) {
-            gc.setFill(EMPTY_HINT);
+            gc.setFill(emptyHint);
             gc.fillText("Import an image to generate a bead pattern", 24, 28);
             return;
         }
@@ -185,8 +208,8 @@ public class InteractiveCanvas extends Canvas {
             }
         }
 
-        // Fine grid lines.
-        gc.setStroke(CELL_LINE);
+        // grid lines
+        gc.setStroke(cellLine);
         gc.setLineWidth(0.5);
         for (int x = x0; x <= x1; x++) {
             double px = offsetX + x * scale;
@@ -199,7 +222,7 @@ public class InteractiveCanvas extends Canvas {
 
         // Bold sub-grid lines.
         int interval = board.subGridInterval();
-        gc.setStroke(SUB_GRID_LINE);
+        gc.setStroke(subGridLine);
         gc.setLineWidth(1.2);
         for (int x = 0; x <= cols; x += interval) {
             double px = offsetX + x * scale;
@@ -210,8 +233,8 @@ public class InteractiveCanvas extends Canvas {
             gc.strokeLine(0, py, w, py);
         }
 
-        // Outer border.
-        gc.setStroke(BORDER);
+        // outer border
+        gc.setStroke(border);
         gc.setLineWidth(1.5);
         gc.strokeRect(offsetX, offsetY, cols * scale, rows * scale);
     }
@@ -249,6 +272,7 @@ public class InteractiveCanvas extends Canvas {
         }
     }
 
+    /** Applies the active tool at the cell under the cursor. */
     private void handleMoved(MouseEvent e) {
         PatternProject p = project.get();
         if (p == null) {

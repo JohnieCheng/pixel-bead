@@ -15,6 +15,11 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public final class AppState {
 
+    /** Color themes; the UI root carries the matching CSS class. */
+    public enum Theme {
+        DARK, LIGHT
+    }
+
     private static final AppState INSTANCE = new AppState();
 
     public static AppState get() {
@@ -28,6 +33,9 @@ public final class AppState {
     private final ObjectProperty<ImageDownsampler.Interpolation> interpolation =
             new SimpleObjectProperty<>(ImageDownsampler.Interpolation.BILINEAR);
     private final ObjectProperty<PatternProject> currentProject = new SimpleObjectProperty<>();
+
+    /** Active color theme; light is the default. */
+    private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
 
     private AppState() {
     }
@@ -54,5 +62,9 @@ public final class AppState {
 
     public ObjectProperty<PatternProject> currentProjectProperty() {
         return currentProject;
+    }
+
+    public ObjectProperty<Theme> themeProperty() {
+        return theme;
     }
 }

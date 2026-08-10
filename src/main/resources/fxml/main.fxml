@@ -19,8 +19,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.johnie.pixelbead.ui.MainController"
-            prefWidth="1280" prefHeight="800">
+<BorderPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.johnie.pixelbead.ui.MainController" prefWidth="1280" prefHeight="800">
     <top>
         <ToolBar>
             <Button fx:id="importButton" text="Import Image" onAction="#onImportImage"/>
@@ -29,6 +28,7 @@
             <Button fx:id="exportButton" text="Export" onAction="#onExport" disable="true"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Fit View" onAction="#onFitView"/>
+            <Button fx:id="themeButton" text="Dark" onAction="#onToggleTheme"/>
         </ToolBar>
     </top>
     <left>
@@ -36,6 +36,7 @@
             <padding>
                 <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
+            <Separator/>
             <Label styleClass="panel-title" text="Board"/>
             <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>
             <VBox fx:id="customBoardPane" spacing="6" visible="false" managed="false">
