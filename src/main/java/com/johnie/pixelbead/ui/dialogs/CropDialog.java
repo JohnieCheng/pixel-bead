@@ -142,6 +142,18 @@ public final class CropDialog {
         layout.run();
 
         ToggleButton lock = new ToggleButton("Lock 1:1");
+        // Locking immediately snaps the selection to the largest centred
+        // square inside the canvas; dragging afterwards keeps the ratio.
+        lock.selectedProperty().addListener((obs, was, now) -> {
+            if (now) {
+                double size = Math.min(dispW, dispH);
+                sel[0] = (dispW - size) / 2;
+                sel[1] = (dispH - size) / 2;
+                sel[2] = size;
+                sel[3] = size;
+                layout.run();
+            }
+        });
         Button cropButton = new Button("Crop");
         cropButton.setDefaultButton(true);
         Button cancelButton = new Button("Cancel");
