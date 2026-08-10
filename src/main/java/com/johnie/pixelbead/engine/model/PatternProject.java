@@ -46,6 +46,25 @@ public final class PatternProject {
         return grid;
     }
 
+    /** Returns the color index at a cell, or -1 for empty. */
+    public int cell(int x, int y) {
+        return grid[y][x];
+    }
+
+    /**
+     * Sets the color index at a cell (-1 clears it). Editing is allowed in
+     * place; callers must notify the view (AppState.editCount) to repaint.
+     */
+    public void setCell(int x, int y, int index) {
+        if (x < 0 || y < 0 || x >= grid[0].length || y >= grid.length) {
+            throw new IllegalArgumentException("cell out of range: " + x + "," + y);
+        }
+        if (index < -1 || index >= palette.size()) {
+            throw new IllegalArgumentException("color index out of range: " + index);
+        }
+        grid[y][x] = index;
+    }
+
     /**
      * Bead count per palette index, aligned with the palette order.
      * Empty cells (-1) are not counted.

@@ -9,12 +9,15 @@ import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
 import com.johnie.pixelbead.engine.renderer.PatternExporter;
 import com.johnie.pixelbead.ui.components.InteractiveCanvas;
 import com.johnie.pixelbead.ui.state.AppState;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -24,7 +27,12 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
@@ -69,6 +77,16 @@ public class MainController {
     private InteractiveCanvas canvas;
     @FXML
     private ComboBox<String> boardCombo;
+    @FXML
+    private ToggleButton brushTool;
+    @FXML
+    private ToggleButton eraserTool;
+    @FXML
+    private ToggleButton pickerTool;
+    @FXML
+    private Button undoButton;
+    @FXML
+    private Button redoButton;
     @FXML
     private Button themeButton;
     @FXML
@@ -127,6 +145,7 @@ public class MainController {
         setupCountTable();
         setupPalettePane();
         setupExportControls();
+        setupTools();
         setupTheme();
 
         canvas.projectProperty().bind(state.currentProjectProperty());
@@ -293,10 +312,103 @@ public class MainController {
             swatch.setStroke(Color.web("#3A3F4B"));
             swatch.setStrokeWidth(1);
             Tooltip.install(swatch, new Tooltip(color.code()));
+            final int index = i;
+            swatch.setOnMouseClicked(e -> state.selectedColorIndexProperty().set(index));
             palettePane.getChildren().add(swatch);
+        }
+        state.selectedColorIndexProperty().addListener((obs, old, idx) -> refreshSwatchHighlight());
+        refreshSwatchHighlight();
+    }
+
+    /** Highlights the selected palette swatch with the accent color. */
+    private void refreshSwatchHighlight() {
+        int selected = state.selectedColorIndexProperty().get();
+        for (int i = 0; i < palettePane.getChildren().size(); i++) {
+            Node node = palettePane.getChildren().get(i);
+            if (node instanceof Rectangle swatch) {
+                if (i == selected) {
+                    swatch.setStroke(Color.web("#61AFEF"));
+                    swatch.setStrokeWidth(2);
+                } else {
+                    swatch.setStroke(Color.web("#3A3F4B"));
+                    swatch.setStrokeWidth(1);
+                }
+            }
         }
     }
 
+    /** Wires the tool toggles, undo/redo buttons, shortcuts and edit stats. */
+    private void setupTools() {
+        ToggleGroup tools = new ToggleGroup();
+        brushTool.setToggleGroup(tools);
+        eraserTool.setToggleGroup(tools);
+        pickerTool.setToggleGroup(tools);
+        tools.selectedToggleProperty().addListener((obs, old, sel) -> {
+            if (sel == eraserTool) {
+                state.activeToolProperty().set(AppState.ToolType.ERASER);
+            } else if (sel == pickerTool) {
+                state.activeToolProperty().set(AppState.ToolType.EYEDROPPER);
+            } else {
+                state.activeToolProperty().set(AppState.ToolType.BRUSH);
+            }
+        });
+
+        // Grid edits refresh the stats table and history buttons.
+        state.editCountProperty().addListener(obs -> {
+            PatternProject p = state.currentProjectProperty().get();
+            if (p != null) {
+                updateCountTable(p);
+                updatePatternInfo(p);
+            }
+            refreshHistoryButtons();
+        });
+
+        Platform.runLater(() -> {
+            Scene scene = importButton.getScene();
+            if (scene == null) {
+                return;
+            }
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), this::undo);
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), this::redo);
+        });
+    }
+
+    @FXML
+    private void onUndo() {
+        undo();
+    }
+
+    @FXML
+    private void onRedo() {
+        redo();
+    }
+
+    private void undo() {
+        PatternProject p = state.currentProjectProperty().get();
+        if (p == null) {
+            return;
+        }
+        if (state.editHistory().undo(p.grid())) {
+            state.editCountProperty().set(state.editCountProperty().get() + 1);
+        }
+    }
+
+    private void redo() {
+        PatternProject p = state.currentProjectProperty().get();
+        if (p == null) {
+            return;
+        }
+        if (state.editHistory().redo(p.grid())) {
+            state.editCountProperty().set(state.editCountProperty().get() + 1);
+        }
+    }
+
+    private void refreshHistoryButtons() {
+        undoButton.setDisable(!state.editHistory().canUndo());
+        redoButton.setDisable(!state.editHistory().canRedo());
+    }
 
     @FXML
     private void onFitView() {
@@ -386,6 +498,8 @@ public class MainController {
             }
             PatternProject project = task.getValue();
             state.currentProjectProperty().set(project);
+            state.resetEditState();
+            refreshHistoryButtons();
             updatePatternInfo(project);
             updateCountTable(project);
             hideOverlay();

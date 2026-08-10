@@ -4,7 +4,9 @@ import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 /**
@@ -14,6 +16,11 @@ import javafx.beans.property.SimpleObjectProperty;
  * layer never touches this class.
  */
 public final class AppState {
+
+    /** Editing tools. */
+    public enum ToolType {
+        BRUSH, ERASER, EYEDROPPER
+    }
 
     /** Color themes; the UI root carries the matching CSS class. */
     public enum Theme {
@@ -34,6 +41,14 @@ public final class AppState {
             new SimpleObjectProperty<>(ImageDownsampler.Interpolation.BILINEAR);
     private final ObjectProperty<PatternProject> currentProject = new SimpleObjectProperty<>();
 
+    /** Currently selected palette index (the brush color). */
+    private final IntegerProperty selectedColorIndex = new SimpleIntegerProperty(0);
+    /** Active editing tool. */
+    private final ObjectProperty<ToolType> activeTool = new SimpleObjectProperty<>(ToolType.BRUSH);
+    /** Bumped on every grid edit; views repaint on change without re-fitting. */
+    private final IntegerProperty editCount = new SimpleIntegerProperty();
+    /** Undo/redo snapshots for the current pattern. */
+    private final EditHistory editHistory = new EditHistory();
     /** Active color theme; light is the default. */
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
 
@@ -64,7 +79,29 @@ public final class AppState {
         return currentProject;
     }
 
+    public IntegerProperty selectedColorIndexProperty() {
+        return selectedColorIndex;
+    }
+
+    public ObjectProperty<ToolType> activeToolProperty() {
+        return activeTool;
+    }
+
+    public IntegerProperty editCountProperty() {
+        return editCount;
+    }
+
+    public EditHistory editHistory() {
+        return editHistory;
+    }
+
     public ObjectProperty<Theme> themeProperty() {
         return theme;
+    }
+
+    /** Clears edit history and edit counter (called when a new pattern loads). */
+    public void resetEditState() {
+        editHistory.clear();
+        editCount.set(0);
     }
 }

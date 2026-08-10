@@ -11,6 +11,7 @@
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
@@ -36,6 +37,16 @@
             <padding>
                 <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
+            <Label styleClass="panel-title" text="Tools"/>
+            <HBox spacing="6">
+                <ToggleButton fx:id="brushTool" text="Brush" maxWidth="Infinity" HBox.hgrow="ALWAYS" selected="true"/>
+                <ToggleButton fx:id="eraserTool" text="Eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                <ToggleButton fx:id="pickerTool" text="Pick" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
+            <HBox spacing="6">
+                <Button fx:id="undoButton" text="Undo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onUndo" disable="true"/>
+                <Button fx:id="redoButton" text="Redo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onRedo" disable="true"/>
+            </HBox>
             <Separator/>
             <Label styleClass="panel-title" text="Board"/>
             <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>

@@ -53,6 +53,7 @@ public class InteractiveCanvas extends Canvas {
     private double lastX;
     private double lastY;
     private boolean spaceDown = false;
+    private boolean strokeStarted = false;
 
     private final AppState state = AppState.get();
 
@@ -84,6 +85,8 @@ public class InteractiveCanvas extends Canvas {
         setOnMouseDragged(this::handleDragged);
         setOnMouseMoved(this::handleMoved);
         setOnMouseExited(e -> hoverInfo.set(""));
+        // Grid edits repaint in place; the viewport must not re-fit.
+        state.editCountProperty().addListener(obs -> redraw());
         // Theme switch repaints the canvas with the matching palette.
         state.themeProperty().addListener((obs, old, theme) -> applyTheme(theme));
         applyTheme(state.themeProperty().get());
@@ -259,6 +262,10 @@ public class InteractiveCanvas extends Canvas {
             panning = true;
             lastX = e.getX();
             lastY = e.getY();
+        } else if (e.isPrimaryButtonDown()) {
+            // New edit stroke: push the pre-edit snapshot on the first mutation.
+            strokeStarted = false;
+            applyTool(e);
         }
     }
 
@@ -269,10 +276,57 @@ public class InteractiveCanvas extends Canvas {
             lastX = e.getX();
             lastY = e.getY();
             redraw();
+        } else if (e.isPrimaryButtonDown()) {
+            applyTool(e);
         }
     }
 
     /** Applies the active tool at the cell under the cursor. */
+    private void applyTool(MouseEvent e) {
+        PatternProject p = project.get();
+        if (p == null) {
+            return;
+        }
+        int cellX = (int) Math.floor((e.getX() - offsetX) / scale);
+        int cellY = (int) Math.floor((e.getY() - offsetY) / scale);
+        if (cellX < 0 || cellY < 0 || cellX >= p.board().columns() || cellY >= p.board().rows()) {
+            return;
+        }
+        switch (state.activeToolProperty().get()) {
+            case BRUSH -> {
+                int idx = state.selectedColorIndexProperty().get();
+                if (idx < 0 || idx >= p.palette().size()) {
+                    return;
+                }
+                if (p.cell(cellX, cellY) != idx) {
+                    beginStroke(p);
+                    p.setCell(cellX, cellY, idx);
+                    state.editCountProperty().set(state.editCountProperty().get() + 1);
+                }
+            }
+            case ERASER -> {
+                if (p.cell(cellX, cellY) != -1) {
+                    beginStroke(p);
+                    p.setCell(cellX, cellY, -1);
+                    state.editCountProperty().set(state.editCountProperty().get() + 1);
+                }
+            }
+            case EYEDROPPER -> {
+                int idx = p.cell(cellX, cellY);
+                if (idx >= 0) {
+                    state.selectedColorIndexProperty().set(idx);
+                }
+            }
+        }
+    }
+
+    private void beginStroke(PatternProject p) {
+        if (!strokeStarted) {
+            strokeStarted = true;
+            state.editHistory().push(p.grid());
+        }
+    }
+
     private void handleMoved(MouseEvent e) {
         PatternProject p = project.get();
         if (p == null) {
