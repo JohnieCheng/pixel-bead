@@ -1,6 +1,7 @@
 package com.johnie.pixelbead.ui;
 
 import com.johnie.pixelbead.engine.BeadEngine;
+import com.johnie.pixelbead.engine.quantizer.ColorDifference;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
@@ -23,10 +24,12 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.stage.Popup;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -36,6 +39,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -47,8 +51,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 /**
  * Main window controller: wires the AppState to the FXML layout and drives
@@ -57,7 +63,7 @@ import java.util.List;
 public class MainController {
 
     /** One row of the bead count table. */
-    public record BeadCountRow(BeadColor color, int count) {
+    public record BeadCountRow(int colorIndex, BeadColor color, int count) {
     }
 
     /** Supported export formats. */
@@ -121,6 +127,8 @@ public class MainController {
     private TableColumn<BeadCountRow, Integer> countColumn;
     @FXML
     private Label hoverLabel;
+    @FXML
+    private Label statusLabel;
     @FXML
     private Label patternInfoLabel;
     @FXML
@@ -302,6 +310,135 @@ public class MainController {
             }
         });
         countColumn.setCellValueFactory(cd -> new ReadOnlyObjectWrapper<>(cd.getValue().count()));
+        setupCountTableInteractions();
+    }
+
+    /** Hover highlights the colour on canvas; right-click opens the replace picker. */
+    private void setupCountTableInteractions() {
+        countTable.setRowFactory(tv -> {
+            TableRow<BeadCountRow> row = new TableRow<>();
+            row.hoverProperty().addListener((obs, was, hover) -> {
+                if (hover && !row.isEmpty()) {
+                    canvas.setHighlight(row.getItem().colorIndex());
+                } else if (was) {
+                    canvas.clearHighlight();
+                }
+            });
+            row.setOnContextMenuRequested(e -> {
+                if (row.isEmpty()) {
+                    return;
+                }
+                showReplacePicker(row.getItem(), e.getScreenX(), e.getScreenY());
+            });
+            return row;
+        });
+    }
+
+    /** Popup listing similar colours (ΔE2000) plus a palette picker entry. */
+    private void showReplacePicker(BeadCountRow source, double screenX, double screenY) {
+        PatternProject project = state.currentProjectProperty().get();
+        if (project == null) {
+            return;
+        }
+        BeadPalette palette = project.palette();
+        int from = source.colorIndex();
+
+        List<Integer> similar = IntStream.range(0, palette.size())
+                .filter(i -> i != from)
+                .boxed()
+                .sorted(Comparator.comparingDouble(
+                        i -> ColorDifference.de2000(palette.colorAt(from).lab(), palette.colorAt(i).lab())))
+                .limit(8)
+                .toList();
+
+        VBox box = new VBox(4);
+        // Popup content lives outside the main root: carry the theme classes
+        // so -pixel-* variables resolve (same pattern as CropDialog).
+        box.getStyleClass().addAll("root", "replace-picker",
+                state.themeProperty().get() == AppState.Theme.DARK ? "theme-dark" : "theme-light");
+        Label header = new Label(source.color().code() + " \u00b7 " + source.count() + " beads");
+        header.getStyleClass().add("replace-picker-header");
+        box.getChildren().add(header);
+
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        for (int idx : similar) {
+            box.getChildren().add(buildPickerItem(popup, palette, from, idx));
+        }
+        box.getChildren().add(buildPickerItem(popup, palette, from, -1));
+
+        popup.setOnHiding(e -> {
+            canvas.clearHighlight();
+            canvas.clearReplacePreview();
+        });
+        popup.getContent().add(box);
+        popup.show(countTable.getScene().getWindow(), screenX, screenY);
+    }
+
+    private HBox buildPickerItem(Popup popup, BeadPalette palette, int from, int target) {
+        HBox item = new HBox(8);
+        item.getStyleClass().add("replace-picker-item");
+        String text;
+        if (target >= 0) {
+            BeadColor color = palette.colorAt(target);
+            Rectangle swatch = new Rectangle(14, 14);
+            swatch.setFill(Color.rgb(color.r(), color.g(), color.b()));
+            swatch.setStroke(Color.web("#999999"));
+            swatch.setStrokeWidth(0.5);
+            item.getChildren().add(swatch);
+            double dE = ColorDifference.de2000(palette.colorAt(from).lab(), color.lab());
+            text = color.code() + "  \u0394E " + String.format("%.1f", dE);
+        } else {
+            text = "Pick from palette...";
+        }
+        item.getChildren().add(new Label(text));
+
+        item.setOnMouseEntered(e -> {
+            canvas.clearHighlight();
+            if (target >= 0) {
+                canvas.setReplacePreview(from, target);
+            }
+        });
+        item.setOnMouseExited(e -> canvas.clearReplacePreview());
+        item.setOnMouseClicked(e -> {
+            popup.hide();
+            if (target >= 0) {
+                executeReplace(from, target);
+            } else {
+                state.replaceFromIndexProperty().set(from);
+            }
+        });
+        return item;
+    }
+
+    /** Replaces all cells of fromIndex with toIndex as one undo step. */
+    private void executeReplace(int fromIndex, int toIndex) {
+        if (fromIndex == toIndex) {
+            return;
+        }
+        PatternProject project = state.currentProjectProperty().get();
+        if (project == null) {
+            return;
+        }
+        state.editHistory().push(project.grid());
+        int replaced = project.replaceColor(fromIndex, toIndex);
+        state.replaceFromIndexProperty().set(-1);
+        canvas.clearReplacePreview();
+        canvas.clearHighlight();
+        state.editCountProperty().set(state.editCountProperty().get() + 1);
+        showToast("Replaced " + replaced + " cells with " + project.palette().colorAt(toIndex).code());
+    }
+
+    private void cancelReplaceMode() {
+        state.replaceFromIndexProperty().set(-1);
+        canvas.clearReplacePreview();
+        updateReplaceHint(false);
+    }
+
+    private void updateReplaceHint(boolean picking) {
+        statusLabel.setText(picking
+                ? "Pick a target colour in the palette (Esc to cancel)"
+                : "");
     }
 
     private void setupPalettePane() {
@@ -315,7 +452,23 @@ public class MainController {
             swatch.setStrokeWidth(1);
             Tooltip.install(swatch, new Tooltip(color.code()));
             final int index = i;
-            swatch.setOnMouseClicked(e -> state.selectedColorIndexProperty().set(index));
+            swatch.setOnMouseEntered(e -> {
+                if (state.replaceFromIndexProperty().get() >= 0) {
+                    canvas.setReplacePreview(state.replaceFromIndexProperty().get(), index);
+                }
+            });
+            swatch.setOnMouseExited(e -> {
+                if (state.replaceFromIndexProperty().get() >= 0) {
+                    canvas.clearReplacePreview();
+                }
+            });
+            swatch.setOnMouseClicked(e -> {
+                if (state.replaceFromIndexProperty().get() >= 0) {
+                    executeReplace(state.replaceFromIndexProperty().get(), index);
+                    return;
+                }
+                state.selectedColorIndexProperty().set(index);
+            });
             palettePane.getChildren().add(swatch);
         }
         state.selectedColorIndexProperty().addListener((obs, old, idx) -> refreshSwatchHighlight());
@@ -365,6 +518,9 @@ public class MainController {
             refreshHistoryButtons();
         });
 
+        // Replace-mode hint follows the shared state (palette pick, canvas cancel, Esc).
+        state.replaceFromIndexProperty().addListener((obs, old, idx) -> updateReplaceHint(idx.intValue() >= 0));
+
         Platform.runLater(() -> {
             Scene scene = importButton.getScene();
             if (scene == null) {
@@ -374,6 +530,8 @@ public class MainController {
                     new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN), this::undo);
             scene.getAccelerators().put(
                     new KeyCodeCombination(KeyCode.Z, KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_DOWN), this::redo);
+            scene.getAccelerators().put(
+                    new KeyCodeCombination(KeyCode.ESCAPE), this::cancelReplaceMode);
         });
     }
 
@@ -664,7 +822,7 @@ public class MainController {
         ObservableList<BeadCountRow> rows = FXCollections.observableArrayList();
         for (int i = 0; i < counts.length; i++) {
             if (counts[i] > 0) {
-                rows.add(new BeadCountRow(project.palette().colorAt(i), counts[i]));
+                rows.add(new BeadCountRow(i, project.palette().colorAt(i), counts[i]));
             }
         }
         rows.sort((a, b) -> Integer.compare(b.count(), a.count()));

@@ -327,6 +327,40 @@
     -fx-background-color: -pixel-panel;
 }
 
+.status-hint {
+    -fx-text-fill: -pixel-text-dim;
+}
+
+/* ---------- replace picker ---------- */
+
+.replace-picker {
+    -fx-background-color: -pixel-elevated;
+    -fx-background-radius: 8;
+    -fx-border-color: -pixel-border-strong;
+    -fx-border-radius: 8;
+    -fx-padding: 8;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 12, 0, 0, 3);
+}
+
+.replace-picker-header {
+    -fx-text-fill: -pixel-text-dim;
+    -fx-font-size: 11px;
+    -fx-padding: 0 4 4 4;
+}
+
+.replace-picker-item {
+    -fx-padding: 4 8 4 8;
+    -fx-background-radius: 4;
+}
+
+.replace-picker-item:hover {
+    -fx-background-color: -pixel-hover;
+}
+
+.replace-picker-item .label {
+    -fx-text-fill: -pixel-text;
+}
+
 /* ---------- toast ---------- */
 
 .toast {

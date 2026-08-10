@@ -52,6 +52,26 @@ public final class PatternProject {
     }
 
     /**
+     * Replaces every cell holding {@code fromIndex} with {@code toIndex}
+     * and returns the number of replaced cells.
+     */
+    public int replaceColor(int fromIndex, int toIndex) {
+        if (fromIndex == toIndex) {
+            return 0;
+        }
+        int count = 0;
+        for (int[] row : grid) {
+            for (int i = 0; i < row.length; i++) {
+                if (row[i] == fromIndex) {
+                    row[i] = toIndex;
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
      * Sets the color index at a cell (-1 clears it). Editing is allowed in
      * place; callers must notify the view (AppState.editCount) to repaint.
      */

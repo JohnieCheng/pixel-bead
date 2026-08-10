@@ -98,6 +98,7 @@
                 <Insets top="6" right="12" bottom="6" left="12"/>
             </padding>
             <Label fx:id="hoverLabel" text=""/>
+            <Label fx:id="statusLabel" styleClass="status-hint" text=""/>
             <Region HBox.hgrow="ALWAYS"/>
             <Label fx:id="boardSizeLabel" text=""/>
         </HBox>

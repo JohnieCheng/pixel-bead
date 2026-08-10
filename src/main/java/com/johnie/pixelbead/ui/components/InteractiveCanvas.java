@@ -5,6 +5,9 @@ import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.ui.state.AppState;
+import javafx.animation.AnimationTimer;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.canvas.Canvas;
@@ -29,12 +32,13 @@ public class InteractiveCanvas extends Canvas {
     private static final double MAX_SCALE = 64.0;
     private static final double ZOOM_STEP = 1.15;
 
-    // Theme colors (kept in sync with css/style.css).
+    // Theme colors (kept in sync with css/style.css): bg, cellLine, subGridLine,
+    // border, emptyHint, accent.
     private static final Color[] DARK = {
-            Color.web("#1E2228"), Color.web("#2B303B"), Color.web("#3A3F4B"), Color.web("#565C6A"), Color.web("#9AA2B0")
+            Color.web("#1E2228"), Color.web("#2B303B"), Color.web("#3A3F4B"), Color.web("#565C6A"), Color.web("#9AA2B0"), Color.web("#61AFEF")
     };
     private static final Color[] LIGHT = {
-            Color.web("#F5F6F8"), Color.web("#E3E6EA"), Color.web("#C9D1D9"), Color.web("#9AA4AF"), Color.web("#59636E")
+            Color.web("#F5F6F8"), Color.web("#E3E6EA"), Color.web("#C9D1D9"), Color.web("#9AA4AF"), Color.web("#59636E"), Color.web("#3B82C4")
     };
 
     private Color bg = DARK[0];
@@ -42,6 +46,7 @@ public class InteractiveCanvas extends Canvas {
     private Color subGridLine = DARK[2];
     private Color border = DARK[3];
     private Color emptyHint = DARK[4];
+    private Color accent = DARK[5];
 
     private final ObjectProperty<PatternProject> project = new SimpleObjectProperty<>();
     private final ObjectProperty<String> hoverInfo = new SimpleObjectProperty<>("");
@@ -56,6 +61,13 @@ public class InteractiveCanvas extends Canvas {
     private boolean strokeStarted = false;
 
     private final AppState state = AppState.get();
+
+    /** Palette index whose cells pulse-highlight when hovering the count table. */
+    private final IntegerProperty highlightIndex = new SimpleIntegerProperty(-1);
+    /** Replacement preview: cells of fromIndex shown as toIndex while picking. */
+    private final IntegerProperty previewFrom = new SimpleIntegerProperty(-1);
+    private final IntegerProperty previewTo = new SimpleIntegerProperty(-1);
+    private long animStart = -1;
 
     public InteractiveCanvas() {
         // Canvas is not Resizable; containers never stretch it. Bind our size
@@ -89,6 +101,31 @@ public class InteractiveCanvas extends Canvas {
         state.editCountProperty().addListener(obs -> redraw());
         // Theme switch repaints the canvas with the matching palette.
         state.themeProperty().addListener((obs, old, theme) -> applyTheme(theme));
+        // Pulse animation while any highlight/preview is active.
+        AnimationTimer animator = new AnimationTimer() {
+            @Override
+            public void handle(long now) {
+                if (highlightIndex.get() < 0 && previewFrom.get() < 0) {
+                    stop();
+                    animStart = -1;
+                    return;
+                }
+                if (animStart < 0) {
+                    animStart = now;
+                }
+                redraw();
+            }
+        };
+        highlightIndex.addListener(obs -> {
+            if (highlightIndex.get() >= 0) {
+                animator.start();
+            }
+        });
+        previewFrom.addListener(obs -> {
+            if (previewFrom.get() >= 0) {
+                animator.start();
+            }
+        });
         applyTheme(state.themeProperty().get());
     }
 
@@ -99,6 +136,7 @@ public class InteractiveCanvas extends Canvas {
         subGridLine = palette[2];
         border = palette[3];
         emptyHint = palette[4];
+        accent = palette[5];
         redraw();
     }
 
@@ -240,6 +278,63 @@ public class InteractiveCanvas extends Canvas {
         gc.setStroke(border);
         gc.setLineWidth(1.5);
         gc.strokeRect(offsetX, offsetY, cols * scale, rows * scale);
+
+        drawHighlightOverlay(gc, p);
+    }
+
+    /** Paints pulse-highlight and replacement preview overlays on top of the grid. */
+    private void drawHighlightOverlay(GraphicsContext gc, PatternProject p) {
+        int hl = highlightIndex.get();
+        int pf = previewFrom.get();
+        int pt = previewTo.get();
+        if (hl < 0 && pf < 0) {
+            return;
+        }
+        // 4s breathing cycle: brighten/fade once per four seconds.
+        double pulse = 0.5 + 0.5 * Math.sin(Math.PI * 2 * (System.nanoTime() - animStart) / 4_000_000_000.0);
+        BeadPalette palette = p.palette();
+        int[][] grid = p.grid();
+        for (int y = 0; y < grid.length; y++) {
+            for (int x = 0; x < grid[y].length; x++) {
+                int idx = grid[y][x];
+                if (idx < 0) {
+                    continue;
+                }
+                double px = offsetX + x * scale;
+                double py = offsetY + y * scale;
+                if (idx == pf && pt >= 0 && pt < palette.size()) {
+                    BeadColor target = palette.colorAt(pt);
+                    gc.setFill(Color.color(target.r() / 255.0, target.g() / 255.0, target.b() / 255.0,
+                            0.55 + 0.4 * pulse));
+                    gc.fillRect(px, py, scale, scale);
+                }
+                if (idx == hl) {
+                    gc.setStroke(accent);
+                    gc.setLineWidth(1.5 + 1.0 * pulse);
+                    gc.strokeRect(px - 1, py - 1, scale + 2, scale + 2);
+                }
+            }
+        }
+    }
+
+    /** Pulse-highlights every cell of the given palette index (-1 clears). */
+    public void setHighlight(int paletteIndex) {
+        highlightIndex.set(paletteIndex);
+    }
+
+    public void clearHighlight() {
+        highlightIndex.set(-1);
+    }
+
+    /** Previews replacing cells of fromIndex with toIndex (-1 to clear). */
+    public void setReplacePreview(int fromIndex, int toIndex) {
+        previewFrom.set(fromIndex);
+        previewTo.set(toIndex);
+    }
+
+    public void clearReplacePreview() {
+        previewFrom.set(-1);
+        previewTo.set(-1);
     }
 
     private void handleScroll(ScrollEvent e) {
@@ -283,6 +378,13 @@ public class InteractiveCanvas extends Canvas {
 
     /** Applies the active tool at the cell under the cursor. */
     private void applyTool(MouseEvent e) {
+        if (previewFrom.get() >= 0) {
+            // Replace-target picking: clicking the canvas cancels instead of
+            // painting over the pattern.
+            clearReplacePreview();
+            state.replaceFromIndexProperty().set(-1);
+            return;
+        }
         PatternProject p = project.get();
         if (p == null) {
             return;

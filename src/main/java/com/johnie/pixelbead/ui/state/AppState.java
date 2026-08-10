@@ -49,6 +49,8 @@ public final class AppState {
     private final IntegerProperty editCount = new SimpleIntegerProperty();
     /** Undo/redo snapshots for the current pattern. */
     private final EditHistory editHistory = new EditHistory();
+    /** Source colour of a pending replacement; -1 when not picking a target. */
+    private final IntegerProperty replaceFromIndex = new SimpleIntegerProperty(-1);
     /** Active color theme; light is the default. */
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
 
@@ -93,6 +95,10 @@ public final class AppState {
 
     public EditHistory editHistory() {
         return editHistory;
+    }
+
+    public IntegerProperty replaceFromIndexProperty() {
+        return replaceFromIndex;
     }
 
     public ObjectProperty<Theme> themeProperty() {
