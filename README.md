@@ -12,13 +12,13 @@
 - **导出**：
   - PNG（300 DPI，1:1 物理尺寸，色块+色号标注+坐标轴+图例）
   - PDF（PDFBox 单页，物理尺寸精确）
-  - Text（色号矩阵，`·` 表示空格）
+  - Text（色号矩阵，`.` 表示空格）
 
 ## 技术栈
 
 Java 21 + JavaFX 21 + Maven（JPMS 模块化），ControlsFX、Ikonli、Jackson、PDFBox。
 
-## 构建与运行
+## 开发
 
 ```bash
 # 需要 JDK 21（本机: ~/Documents/Environments/Java/jdk-21.0.9.jdk）
@@ -27,26 +27,42 @@ export JAVA_HOME=~/Documents/Environments/Java/jdk-21.0.9.jdk/Contents/Home
 # 测试
 ./mvnw test
 
-# 开发运行
+# 开发运行（macOS Dock 图标自动生效）
 ./mvnw javafx:run
-
-# 打包 macOS 应用（app-image / dmg）
-./build-mac.sh app-image
-./build-mac.sh dmg        # 产物: target/dist/Pixel Bead-1.0.0.dmg
 ```
 
-### Windows 打包（.exe）
+> **macOS Dock 图标**：`mvnw javafx:run` 已配置 `--add-exports`，开发期即显示应用图标。若用 IntelliJ 直接运行（非 Maven goal），需在 Run Configuration 的 VM options 加：
+> `--add-exports java.desktop/com.apple.eawt=com.johnie.pixelbead`
 
-必须在 **Windows** 机器上执行（jpackage 不能交叉打包）：
+## 打包
+
+版本号**单一来源 = `pom.xml` 的 `<version>`**，打包脚本与 CI 自动读取；本地脚本第二个参数可覆盖（如 `./build-mac.sh dmg 1.0.1`）。
+
+### macOS（本机）
+
+```bash
+./build-mac.sh app-image   # 免安装 .app
+./build-mac.sh dmg         # 安装包 → target/dist/Pixel Bead-*.dmg
+```
+
+### Windows（需在 Windows 机器上执行，jpackage 不能交叉打包）
 
 ```bat
-:: 前置: JDK 21 (JAVA_HOME), Maven 依赖会自动下载
-build-win.bat app-image   :: 免安装绿色版目录
-build-win.bat exe         :: .exe 安装器（需 WiX Toolset 3.14+）
-build-win.bat msi         :: .msi 安装器（需 WiX Toolset 3.14+）
+build-win.bat app-image    :: 免安装目录
+build-win.bat all          :: app-image + 便携 zip + .exe 安装器（exe 需 WiX Toolset 3.14+）
+build-win.bat exe          :: 仅 .exe 安装器（需 WiX）
+build-win.bat msi          :: 仅 .msi 安装器（需 WiX）
 ```
 
-产物在 `target\dist\`。脚本会自动使用 Windows 版 JavaFX（win classifier）。
+### GitHub Actions 自动发版
+
+推 `v*` tag 自动构建并创建 Draft Release（macOS dmg + Windows exe + Windows 便携 zip，版本取自 tag）：
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+手动触发：Actions 页面 → **Release** → **Run workflow**（版本取自 pom.xml）。
 
 ## 架构
 
@@ -67,8 +83,8 @@ resources/
 
 ## 色板说明
 
-`src/main/resources/palettes/mard_standard.json` 当前为**占位数据**（197 色，固定种子生成，覆盖全色相），用于开发测试。替换为真实 Mard 色卡数据时保持 schema：
+`src/main/resources/palettes/mard_standard.json` 为 **Mard 真实色板（291 色，来源 mard.csv，数据来自 [maxcleme/beadcolors](https://github.com/maxcleme/beadcolors)）**。schema：
 
 ```json
-{ "brand": "Mard", "colors": [ { "code": "CE001", "name": "", "rgb": [60, 85, 93] } ] }
+{ "brand": "Mard", "colors": [ { "code": "A1", "name": "", "rgb": [250, 244, 200] } ] }
 ```
