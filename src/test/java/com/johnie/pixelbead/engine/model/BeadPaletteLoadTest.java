@@ -17,12 +17,13 @@ class BeadPaletteLoadTest {
         assertEquals("Mard", palette.brand());
         assertEquals(291, palette.size());
 
-        BeadColor first = palette.colorAt(0);
-        assertEquals("A1", first.code());
-        assertEquals(250, first.r());
-        assertEquals(244, first.g());
-        assertEquals(200, first.b());
-        assertEquals(3, first.lab().length);
+        BeadColor a1 = palette.colorAt(0);
+        assertEquals("A1", a1.code());
+        assertEquals(249, a1.r());
+        assertEquals(240, a1.g());
+        assertEquals(205, a1.b());
+        assertEquals(3, a1.lab().length);
+        assertEquals("#F9F0CD", a1.hex());
 
         assertEquals("ZG8", palette.colorAt(290).code());
     }

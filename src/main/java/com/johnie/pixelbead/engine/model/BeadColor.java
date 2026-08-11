@@ -16,6 +16,10 @@ public final class BeadColor {
     private final int g;
     private final int b;
     private final double[] lab;
+    /**
+     * Official hex value (#RRGGBB);
+     */
+    private String hex;
 
     public BeadColor(String code, String name, int r, int g, int b) {
         if (code == null || code.isBlank()) {
@@ -50,6 +54,17 @@ public final class BeadColor {
 
     public int b() {
         return b;
+    }
+
+    public String hex() {
+        return hex;
+    }
+
+    /**
+     * Sets the official hex value; called by the palette parser.
+     */
+    public void setHex(String hex) {
+        this.hex = hex == null ? "" : hex;
     }
 
     /**

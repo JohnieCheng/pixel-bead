@@ -79,6 +79,7 @@ public final class BeadPalette {
                     rgb.get(0).asInt(),
                     rgb.get(1).asInt(),
                     rgb.get(2).asInt());
+            color.setHex(node.path("hex").asText(""));
             colors.add(color);
         }
         if (colors.isEmpty()) {
