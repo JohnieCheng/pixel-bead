@@ -7,6 +7,8 @@ import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Image to bead pattern conversion pipeline.
@@ -46,6 +48,11 @@ public final class BeadEngine {
 
         BufferedImage scaled = ImageDownsampler.resize(src, scaledW, scaledH, mode);
 
+        // Nearest-color results are cached by exact RGB: images typically hold
+        // far fewer unique colours than cells, so the N×291 ΔE2000 evaluations
+        // collapse to ~uniqueColours×291 for the whole grid.
+        Map<Integer, Integer> nearestCache = new HashMap<>();
+
         int[][] grid = new int[gridH][gridW];
         int[] rowPixels = new int[scaledW];
         for (int y = 0; y < gridH; y++) {
@@ -66,7 +73,13 @@ public final class BeadEngine {
                 if (alpha < ALPHA_OPAQUE_THRESHOLD) {
                     grid[y][x] = -1;
                 } else {
-                    grid[y][x] = palette.nearestIndex((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF);
+                    int rgb = argb & 0xFFFFFF;
+                    Integer nearest = nearestCache.get(rgb);
+                    if (nearest == null) {
+                        nearest = palette.nearestIndex((argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF);
+                        nearestCache.put(rgb, nearest);
+                    }
+                    grid[y][x] = nearest;
                 }
             }
         }
