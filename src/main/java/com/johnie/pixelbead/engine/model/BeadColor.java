@@ -7,6 +7,10 @@ import com.johnie.pixelbead.engine.quantizer.ColorSpace;
  * <p>
  * The CIELAB representation is computed once at construction and cached,
  * so color matching never pays the RGB-LAB conversion cost in a hot loop.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class BeadColor {
 

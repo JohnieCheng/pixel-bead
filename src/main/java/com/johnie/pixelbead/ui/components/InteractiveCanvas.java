@@ -7,8 +7,8 @@ import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.ui.state.AppState;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -25,6 +25,10 @@ import javafx.scene.paint.Color;
  * sub-grid lines every {@code subGridInterval} cells and the outer border.
  * Scroll wheel zooms around the mouse position; Space+drag or middle-button
  * drag pans. Hover position is published as a status string.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public class InteractiveCanvas extends Canvas {
 
@@ -62,14 +66,20 @@ public class InteractiveCanvas extends Canvas {
 
     private final AppState state = AppState.get();
 
-    /** Palette index whose cells pulse-highlight when hovering the count table. */
+    /**
+     * Palette index whose cells pulse-highlight when hovering the count table.
+     */
     private final IntegerProperty highlightIndex = new SimpleIntegerProperty(-1);
-    /** Replacement preview: cells of fromIndex shown as toIndex while picking. */
+    /**
+     * Replacement preview: cells of fromIndex shown as toIndex while picking.
+     */
     private final IntegerProperty previewFrom = new SimpleIntegerProperty(-1);
     private final IntegerProperty previewTo = new SimpleIntegerProperty(-1);
     private long animStart = -1;
 
-    /** When true, grid lines and border are hidden for a finished-bead look. */
+    /**
+     * When true, grid lines and border are hidden for a finished-bead look.
+     */
     private boolean previewMode = false;
 
     public InteractiveCanvas() {
@@ -145,7 +155,9 @@ public class InteractiveCanvas extends Canvas {
         redraw();
     }
 
-    /** Re-fits on every size change so the pattern follows window resizes live. */
+    /**
+     * Re-fits on every size change so the pattern follows window resizes live.
+     */
     private void onSizeChanged() {
         if (getWidth() <= 0 || getHeight() <= 0) {
             return;
@@ -191,12 +203,16 @@ public class InteractiveCanvas extends Canvas {
         return 0;
     }
 
-    /** Test hook: current pixels-per-cell scale. */
+    /**
+     * Test hook: current pixels-per-cell scale.
+     */
     double getScaleForTest() {
         return scale;
     }
 
-    /** Centers the pattern in the viewport at the largest fitting scale. */
+    /**
+     * Centers the pattern in the viewport at the largest fitting scale.
+     */
     public void fitToView() {
         PatternProject p = project.get();
         if (p == null) {
@@ -293,7 +309,9 @@ public class InteractiveCanvas extends Canvas {
         drawHighlightOverlay(gc, p);
     }
 
-    /** Paints pulse-highlight and replacement preview overlays on top of the grid. */
+    /**
+     * Paints pulse-highlight and replacement preview overlays on top of the grid.
+     */
     private void drawHighlightOverlay(GraphicsContext gc, PatternProject p) {
         int hl = highlightIndex.get();
         int pf = previewFrom.get();
@@ -328,7 +346,9 @@ public class InteractiveCanvas extends Canvas {
         }
     }
 
-    /** Toggles finished-bead preview (grid lines hidden). */
+    /**
+     * Toggles finished-bead preview (grid lines hidden).
+     */
     public void setPreviewMode(boolean preview) {
         if (previewMode != preview) {
             previewMode = preview;
@@ -336,7 +356,9 @@ public class InteractiveCanvas extends Canvas {
         }
     }
 
-    /** Pulse-highlights every cell of the given palette index (-1 clears). */
+    /**
+     * Pulse-highlights every cell of the given palette index (-1 clears).
+     */
     public void setHighlight(int paletteIndex) {
         highlightIndex.set(paletteIndex);
     }
@@ -345,7 +367,9 @@ public class InteractiveCanvas extends Canvas {
         highlightIndex.set(-1);
     }
 
-    /** Previews replacing cells of fromIndex with toIndex (-1 to clear). */
+    /**
+     * Previews replacing cells of fromIndex with toIndex (-1 to clear).
+     */
     public void setReplacePreview(int fromIndex, int toIndex) {
         previewFrom.set(fromIndex);
         previewTo.set(toIndex);
@@ -395,7 +419,9 @@ public class InteractiveCanvas extends Canvas {
         }
     }
 
-    /** Applies the active tool at the cell under the cursor. */
+    /**
+     * Applies the active tool at the cell under the cursor.
+     */
     private void applyTool(MouseEvent e) {
         if (previewFrom.get() >= 0) {
             // Replace-target picking: clicking the canvas cancels instead of

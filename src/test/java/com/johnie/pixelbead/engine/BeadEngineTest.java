@@ -10,14 +10,20 @@ import org.junit.jupiter.api.Test;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests the image-to-pattern conversion pipeline.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
+ */
 class BeadEngineTest {
 
     private static BeadPalette palette;
-    private static final BeadBoard BOARD = BeadBoard.MINI_SMALL; // 29x29
+    // 29x29
+    private static final BeadBoard BOARD = BeadBoard.MINI_SMALL;
 
     @BeforeAll
     static void setUp() throws IOException {

@@ -4,6 +4,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests RGB/Lab color space conversions.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
+ */
 class ColorSpaceTest {
 
     @Test

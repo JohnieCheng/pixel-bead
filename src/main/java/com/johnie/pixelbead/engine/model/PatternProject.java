@@ -6,6 +6,10 @@ package com.johnie.pixelbead.engine.model;
  * The grid stores palette indices instead of raw RGB values, keeping the
  * in-memory footprint small and making bead count statistics a single pass.
  * A value of -1 means an empty cell (no bead).
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class PatternProject {
 
@@ -46,7 +50,9 @@ public final class PatternProject {
         return grid;
     }
 
-    /** Returns the color index at a cell, or -1 for empty. */
+    /**
+     * Returns the color index at a cell, or -1 for empty.
+     */
     public int cell(int x, int y) {
         return grid[y][x];
     }

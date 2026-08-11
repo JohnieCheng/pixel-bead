@@ -2,25 +2,10 @@
 
 <?import com.johnie.pixelbead.ui.components.InteractiveCanvas?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressIndicator?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-
-<BorderPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.johnie.pixelbead.ui.MainController" prefWidth="1280" prefHeight="800">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane fx:id="root" xmlns:fx="http://javafx.com/fxml" fx:controller="com.johnie.pixelbead.ui.MainController"
+            prefWidth="1280" prefHeight="800">
     <top>
         <ToolBar>
             <Button fx:id="importButton" text="Import Image" onAction="#onImportImage"/>
@@ -34,63 +19,15 @@
         </ToolBar>
     </top>
     <left>
-        <VBox styleClass="side-panel" spacing="8" prefWidth="230">
-            <padding>
-                <Insets top="12" right="12" bottom="12" left="12"/>
-            </padding>
-            <Label styleClass="panel-title" text="Tools"/>
-            <HBox spacing="6">
-                <ToggleButton fx:id="brushTool" text="Brush" maxWidth="Infinity" HBox.hgrow="ALWAYS" selected="true"/>
-                <ToggleButton fx:id="eraserTool" text="Eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                <ToggleButton fx:id="pickerTool" text="Pick" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-            </HBox>
-            <HBox spacing="6">
-                <Button fx:id="undoButton" text="Undo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onUndo" disable="true"/>
-                <Button fx:id="redoButton" text="Redo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onRedo" disable="true"/>
-            </HBox>
-            <Separator/>
-            <Label styleClass="panel-title" text="Board"/>
-            <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>
-            <VBox fx:id="customBoardPane" spacing="6" visible="false" managed="false">
-                <Label text="Columns"/>
-                <Spinner fx:id="columnsSpinner" editable="true" maxWidth="Infinity"/>
-                <Label text="Rows"/>
-                <Spinner fx:id="rowsSpinner" editable="true" maxWidth="Infinity"/>
-                <Label text="Bead size (mm)"/>
-                <Spinner fx:id="beadSizeSpinner" editable="true" maxWidth="Infinity"/>
-                <Label text="Sub-grid interval"/>
-                <Spinner fx:id="subGridSpinner" editable="true" maxWidth="Infinity"/>
-            </VBox>
-            <Label text="Boards (W x H)"/>
-            <HBox spacing="6">
-                <ComboBox fx:id="boardColsCombo" prefWidth="72"/>
-                <Label text="x"/>
-                <ComboBox fx:id="boardRowsCombo" prefWidth="72"/>
-            </HBox>
-            <Label text="Interpolation"/>
-            <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
-            <Separator/>
-            <Label styleClass="panel-title" text="Pattern"/>
-            <Label fx:id="patternInfoLabel" wrapText="true" styleClass="pattern-info"/>
-        </VBox>
+        <fx:include fx:id="leftPanel" source="left-panel.fxml"/>
     </left>
     <right>
         <VBox styleClass="side-panel" spacing="8" prefWidth="250">
             <padding>
                 <Insets top="12" right="12" bottom="12" left="12"/>
             </padding>
-            <Label styleClass="panel-title" text="Palette"/>
-            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="palette-scroll">
-                <FlowPane fx:id="palettePane" hgap="4" vgap="4"/>
-            </ScrollPane>
-            <Label styleClass="panel-title" text="Bead Count"/>
-            <TableView fx:id="countTable" VBox.vgrow="ALWAYS" prefHeight="240">
-                <columns>
-                    <TableColumn fx:id="codeColumn" text="Code" prefWidth="80"/>
-                    <TableColumn fx:id="swatchColumn" text="Color" prefWidth="60"/>
-                    <TableColumn fx:id="countColumn" text="Beads" prefWidth="70"/>
-                </columns>
-            </TableView>
+            <fx:include fx:id="palettePanel" source="palette-panel.fxml"/>
+            <fx:include fx:id="countPanel" source="count-panel.fxml"/>
         </VBox>
     </right>
     <bottom>

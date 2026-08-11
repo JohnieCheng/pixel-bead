@@ -4,11 +4,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Tests palette JSON loading and color data.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
+ */
 class BeadPaletteLoadTest {
 
     @Test

@@ -8,11 +8,7 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.w3c.dom.Element;
 
-import javax.imageio.IIOImage;
-import javax.imageio.ImageIO;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriteParam;
-import javax.imageio.ImageWriter;
+import javax.imageio.*;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
@@ -31,10 +27,16 @@ import java.nio.file.Path;
  * the bead diameter (5.0mm or 2.6mm) at the target DPI, so printed sheets
  * match real pegboards. Text export writes the grid as color codes with
  * '.' for empty cells.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class PatternExporter {
 
-    /** Render DPI for raster output; 1:1 means cellSize = beadSize at this DPI. */
+    /**
+     * Render DPI for raster output; 1:1 means cellSize = beadSize at this DPI.
+     */
     private static final int DPI = 300;
 
     private PatternExporter() {
@@ -86,7 +88,9 @@ public final class PatternExporter {
         return PatternRenderer.render(project, cellSize);
     }
 
-    /** Writes a PNG with the physical resolution (DPI) recorded in its pHYs chunk. */
+    /**
+     * Writes a PNG with the physical resolution (DPI) recorded in its pHYs chunk.
+     */
     private static void writePngWithDpi(BufferedImage img, Path target, int dpi) throws IOException {
         ImageWriter writer = ImageIO.getImageWritersByFormatName("png").next();
         try (ImageOutputStream ios = ImageIO.createImageOutputStream(target.toFile())) {

@@ -5,12 +5,7 @@ import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -20,6 +15,10 @@ import java.awt.image.BufferedImage;
  * grid lines, bold sub-grid lines, row/column coordinates and a bead count
  * legend. Cell size is expressed in pixels and chosen by the exporter
  * according to the target DPI.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class PatternRenderer {
 

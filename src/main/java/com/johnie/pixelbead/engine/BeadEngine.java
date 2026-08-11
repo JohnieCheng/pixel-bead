@@ -16,10 +16,16 @@ import java.util.Map;
  * Steps: fit-scale the source to the board grid (aspect preserved, centered),
  * then map every cell to the perceptually closest palette color.
  * Transparent pixels (alpha below threshold) become empty cells.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class BeadEngine {
 
-    /** Alpha below this value is treated as transparent (empty cell). */
+    /**
+     * Alpha below this value is treated as transparent (empty cell).
+     */
     private static final int ALPHA_OPAQUE_THRESHOLD = 128;
 
     private BeadEngine() {

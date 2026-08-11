@@ -5,6 +5,13 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests board presets, multi-board sizing and validation.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
+ */
 class BeadBoardTest {
 
     @Test

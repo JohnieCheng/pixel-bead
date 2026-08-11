@@ -20,6 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Layout regression tests: the canvas must track its parent region's size
  * (Canvas is not Resizable, so containers never stretch it on their own).
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 class InteractiveCanvasTest {
 
@@ -32,7 +36,8 @@ class InteractiveCanvasTest {
 
     private static PatternProject smallProject() throws IOException {
         BeadPalette palette = BeadPalette.loadResource("/palettes/mard_standard.json");
-        BeadBoard board = BeadBoard.MINI_SMALL; // 29x29
+        // 29x29
+        BeadBoard board = BeadBoard.MINI_SMALL;
         int[][] grid = new int[29][29];
         for (int[] row : grid) {
             Arrays.fill(row, -1);
@@ -116,7 +121,9 @@ class InteractiveCanvasTest {
                 "scale did not shrink with the parent: " + bigScale.get() + " -> " + smallScale.get());
     }
 
-    /** Runs a task on the FX thread and waits for the given latch to be counted. */
+    /**
+     * Runs a task on the FX thread and waits for the given latch to be counted.
+     */
     private static void runOnFx(Runnable task) throws InterruptedException {
         CountDownLatch done = new CountDownLatch(1);
         Platform.runLater(() -> {

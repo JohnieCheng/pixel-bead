@@ -7,6 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * CIEDE2000 verification against the reference test pairs from
  * Sharma, Wu &amp; Dalal (2005) "The CIEDE2000 Color-Difference Formula".
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 class ColorDifferenceTest {
 

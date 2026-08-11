@@ -18,12 +18,16 @@ import java.util.List;
  * JSON schema:
  * <pre>
  * {
- *   "brand": "Mard",
- *   "colors": [
- *     { "code": "CE001", "name": "", "rgb": [60, 85, 93] }
- *   ]
+ * "brand": "Mard",
+ * "colors": [
+ * { "code": "CE001", "name": "", "rgb": [60, 85, 93] }
+ * ]
  * }
  * </pre>
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class BeadPalette {
 

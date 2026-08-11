@@ -6,6 +6,10 @@ package com.johnie.pixelbead.engine.quantizer;
  * Reference: Sharma, Wu &amp; Dalal, "The CIEDE2000 Color-Difference Formula:
  * Implementation Notes, Supplementary Test Data, and Mathematical Observations"
  * (2005). Test values from that paper are used in {@code ColorDifferenceTest}.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class ColorDifference {
 
@@ -31,7 +35,8 @@ public final class ColorDifference {
         double c2 = Math.hypot(a2, b2);
         double cBar = (c1 + c2) / 2.0;
         double cBar7 = Math.pow(cBar, 7);
-        double g = 0.5 * (1.0 - Math.sqrt(cBar7 / (cBar7 + 6103515625.0))); // 25^7 = 6103515625
+        // 25^7 = 6103515625
+        double g = 0.5 * (1.0 - Math.sqrt(cBar7 / (cBar7 + 6103515625.0)));
 
         double a1p = (1.0 + g) * a1;
         double a2p = (1.0 + g) * a2;
@@ -99,7 +104,9 @@ public final class ColorDifference {
         return Math.sqrt(dlpSl * dlpSl + dcpSc * dcpSc + dhpSh * dhpSh + rt * dcpSc * dhpSh);
     }
 
-    /** Hue angle in degrees in [0, 360), or 0 when chroma is zero. */
+    /**
+     * Hue angle in degrees in [0, 360), or 0 when chroma is zero.
+     */
     private static double hueDeg(double a, double b) {
         if (a == 0.0 && b == 0.0) {
             return 0.0;

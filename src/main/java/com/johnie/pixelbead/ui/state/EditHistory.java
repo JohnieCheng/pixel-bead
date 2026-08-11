@@ -9,6 +9,10 @@ import java.util.Deque;
  * One snapshot is pushed per edit gesture (e.g. a single mouse stroke)
  * before the first mutation; undo/redo swaps the grid content with the
  * stored snapshots. Keeps at most {@link #LIMIT} snapshots.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class EditHistory {
 
@@ -17,7 +21,9 @@ public final class EditHistory {
     private final Deque<int[][]> undoStack = new ArrayDeque<>();
     private final Deque<int[][]> redoStack = new ArrayDeque<>();
 
-    /** Records the grid state before an edit stroke starts. */
+    /**
+     * Records the grid state before an edit stroke starts.
+     */
     public void push(int[][] grid) {
         undoStack.push(copy(grid));
         if (undoStack.size() > LIMIT) {
@@ -26,7 +32,9 @@ public final class EditHistory {
         redoStack.clear();
     }
 
-    /** Restores the most recent pre-edit state; returns false if empty. */
+    /**
+     * Restores the most recent pre-edit state; returns false if empty.
+     */
     public boolean undo(int[][] grid) {
         if (undoStack.isEmpty()) {
             return false;
@@ -36,7 +44,9 @@ public final class EditHistory {
         return true;
     }
 
-    /** Re-applies the most recently undone state; returns false if empty. */
+    /**
+     * Re-applies the most recently undone state; returns false if empty.
+     */
     public boolean redo(int[][] grid) {
         if (redoStack.isEmpty()) {
             return false;
@@ -54,7 +64,9 @@ public final class EditHistory {
         return !redoStack.isEmpty();
     }
 
-    /** Drops all history (e.g. when a new pattern is loaded). */
+    /**
+     * Drops all history (e.g. when a new pattern is loaded).
+     */
     public void clear() {
         undoStack.clear();
         redoStack.clear();

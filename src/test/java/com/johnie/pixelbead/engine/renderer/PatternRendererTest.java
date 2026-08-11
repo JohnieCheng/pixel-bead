@@ -6,13 +6,20 @@ import com.johnie.pixelbead.engine.model.PatternProject;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Tests the AWT pattern renderer and legend layout.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
+ */
 class PatternRendererTest {
 
     private static BeadPalette palette;
@@ -67,7 +74,8 @@ class PatternRendererTest {
     @Test
     void emptyCellIsWhite() {
         BufferedImage img = PatternRenderer.render(project, 24);
-        int rgb = img.getRGB(48, 48); // cell (0,0), empty
+        // Cell (0,0) is empty.
+        int rgb = img.getRGB(48, 48);
         assertEquals(Color.WHITE.getRGB(), rgb);
     }
 

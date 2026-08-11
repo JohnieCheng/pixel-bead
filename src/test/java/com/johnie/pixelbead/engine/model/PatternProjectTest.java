@@ -8,12 +8,20 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Tests the pattern grid model (counts, edits, replacement).
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
+ */
 class PatternProjectTest {
 
     @Test
     void countsBeadsPerColor() throws IOException {
         BeadPalette palette = BeadPalette.loadResource("/palettes/mard_standard.json");
-        BeadBoard board = BeadBoard.MINI_SMALL; // 29x29
+        // 29x29
+        BeadBoard board = BeadBoard.MINI_SMALL;
 
         int[][] grid = new int[29][29];
         for (int[] row : grid) {

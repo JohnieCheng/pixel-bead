@@ -1,7 +1,6 @@
 package com.johnie.pixelbead.engine.quantizer;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
 /**
@@ -9,14 +8,24 @@ import java.awt.image.BufferedImage;
  * <p>
  * BILINEAR smooths edges and is suited for photographic input; NEAREST keeps
  * hard pixel edges and is suited for pixel-art input.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class ImageDownsampler {
 
-    /** Resampling mode. */
+    /**
+     * Resampling mode.
+     */
     public enum Interpolation {
-        /** Keep hard pixel edges (pixel art sources). */
+        /**
+         * Keep hard pixel edges (pixel art sources).
+         */
         NEAREST,
-        /** Smooth interpolation (photographic sources). */
+        /**
+         * Smooth interpolation (photographic sources).
+         */
         BILINEAR
     }
 
@@ -26,10 +35,10 @@ public final class ImageDownsampler {
     /**
      * Resizes an image to the given dimensions.
      *
-     * @param src      source image
-     * @param targetW  target width, &gt; 0
-     * @param targetH  target height, &gt; 0
-     * @param mode     resampling mode
+     * @param src     source image
+     * @param targetW target width, &gt; 0
+     * @param targetH target height, &gt; 0
+     * @param mode    resampling mode
      * @return new image of the target size (ARGB)
      */
     public static BufferedImage resize(BufferedImage src, int targetW, int targetH, Interpolation mode) {

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.VBox?>
+<VBox spacing="8" VBox.vgrow="ALWAYS" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.johnie.pixelbead.ui.panel.CountPanelController">
+    <Label styleClass="panel-title" text="Bead Count"/>
+    <TableView fx:id="countTable" VBox.vgrow="ALWAYS" prefHeight="240">
+        <columns>
+            <TableColumn fx:id="codeColumn" text="Code" prefWidth="80"/>
+            <TableColumn fx:id="swatchColumn" text="Color" prefWidth="60"/>
+            <TableColumn fx:id="countColumn" text="Beads" prefWidth="70"/>
+        </columns>
+    </TableView>
+</VBox>

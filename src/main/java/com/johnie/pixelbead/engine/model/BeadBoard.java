@@ -6,19 +6,31 @@ package com.johnie.pixelbead.engine.model;
  * Encapsulates the physical grid properties of a standard board:
  * bead diameter class, grid dimensions and the sub-grid line interval
  * used by the renderer to draw helper lines.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class BeadBoard {
 
-    /** Mard 2.6mm fine bead, large standard board: 50x50, sub-grid every 10 cells. */
+    /**
+     * Mard 2.6mm fine bead, large standard board: 50x50, sub-grid every 10 cells.
+     */
     public static final BeadBoard MINI_STANDARD = new BeadBoard(50, 50, 2.6, 10);
 
-    /** Mard 2.6mm fine bead, small board: 29x29, sub-grid every 5 cells. */
+    /**
+     * Mard 2.6mm fine bead, small board: 29x29, sub-grid every 5 cells.
+     */
     public static final BeadBoard MINI_SMALL = new BeadBoard(29, 29, 2.6, 5);
 
-    /** Mard 5.0mm midi bead, large standard board: 29x29, sub-grid every 5 cells. */
+    /**
+     * Mard 5.0mm midi bead, large standard board: 29x29, sub-grid every 5 cells.
+     */
     public static final BeadBoard MIDI_STANDARD = new BeadBoard(29, 29, 5.0, 5);
 
-    /** Mard 5.0mm midi bead, small board: 14x14, sub-grid every 7 cells. */
+    /**
+     * Mard 5.0mm midi bead, small board: 14x14, sub-grid every 7 cells.
+     */
     public static final BeadBoard MIDI_SMALL = new BeadBoard(14, 14, 5.0, 7);
 
     private final int columns;

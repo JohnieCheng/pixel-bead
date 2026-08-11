@@ -5,10 +5,16 @@ package com.johnie.pixelbead.engine.quantizer;
  * <p>
  * Provides the standard sRGB -> CIELAB (D65) conversion used for
  * perceptually accurate color matching. Pure math, no AWT/JavaFX dependencies.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class ColorSpace {
 
-    /** D65 white point (CIE 1931 2-degree observer). */
+    /**
+     * D65 white point (CIE 1931 2-degree observer).
+     */
     private static final double[] D65 = {95.047, 100.0, 108.883};
 
     private static final double DELTA = 6.0 / 29.0;
@@ -44,12 +50,16 @@ public final class ColorSpace {
         return new double[]{l, a, bb};
     }
 
-    /** sRGB transfer function: gamma-encoded channel -> linear light. */
+    /**
+     * sRGB transfer function: gamma-encoded channel -> linear light.
+     */
     private static double linearize(double c) {
         return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     }
 
-    /** CIELAB helper function. */
+    /**
+     * CIELAB helper function.
+     */
     private static double f(double t) {
         return t > DELTA * DELTA * DELTA ? Math.cbrt(t) : t / (3 * DELTA * DELTA) + 4.0 / 29.0;
     }

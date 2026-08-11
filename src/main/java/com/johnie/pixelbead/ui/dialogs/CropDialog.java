@@ -7,12 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Modality;
@@ -20,8 +15,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import javax.imageio.ImageIO;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +25,10 @@ import java.util.Optional;
  * Modal crop dialog: lets the user select a rectangular region of the source
  * image before conversion. The selection can be dragged, resized via the four
  * corner handles, or locked to a 1:1 aspect ratio.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class CropDialog {
 
@@ -57,7 +55,8 @@ public final class CropDialog {
         double srcH = source.getHeight();
         double scale = Math.min(MAX_W / srcW, MAX_H / srcH);
         if (scale > 1) {
-            scale = 1; // never upscale the preview
+            // Never upscale the preview.
+            scale = 1;
         }
         double dispW = srcW * scale;
         double dispH = srcH * scale;

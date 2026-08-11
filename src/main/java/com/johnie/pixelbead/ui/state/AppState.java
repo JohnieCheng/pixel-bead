@@ -14,15 +14,23 @@ import javafx.beans.property.SimpleObjectProperty;
  * <p>
  * UI components observe these properties and react to changes; the engine
  * layer never touches this class.
+ *
+ * @author johnie
+ * @version 2.0.0
+ * @since 2026/08/10
  */
 public final class AppState {
 
-    /** Editing tools. */
+    /**
+     * Editing tools.
+     */
     public enum ToolType {
         BRUSH, ERASER, EYEDROPPER
     }
 
-    /** Color themes; the UI root carries the matching CSS class. */
+    /**
+     * Color themes; the UI root carries the matching CSS class.
+     */
     public enum Theme {
         DARK, LIGHT
     }
@@ -41,17 +49,29 @@ public final class AppState {
             new SimpleObjectProperty<>(ImageDownsampler.Interpolation.BILINEAR);
     private final ObjectProperty<PatternProject> currentProject = new SimpleObjectProperty<>();
 
-    /** Currently selected palette index (the brush color). */
+    /**
+     * Currently selected palette index (the brush color).
+     */
     private final IntegerProperty selectedColorIndex = new SimpleIntegerProperty(0);
-    /** Active editing tool. */
+    /**
+     * Active editing tool.
+     */
     private final ObjectProperty<ToolType> activeTool = new SimpleObjectProperty<>(ToolType.BRUSH);
-    /** Bumped on every grid edit; views repaint on change without re-fitting. */
+    /**
+     * Bumped on every grid edit; views repaint on change without re-fitting.
+     */
     private final IntegerProperty editCount = new SimpleIntegerProperty();
-    /** Undo/redo snapshots for the current pattern. */
+    /**
+     * Undo/redo snapshots for the current pattern.
+     */
     private final EditHistory editHistory = new EditHistory();
-    /** Source colour of a pending replacement; -1 when not picking a target. */
+    /**
+     * Source colour of a pending replacement; -1 when not picking a target.
+     */
     private final IntegerProperty replaceFromIndex = new SimpleIntegerProperty(-1);
-    /** Active color theme; light is the default. */
+    /**
+     * Active color theme; light is the default.
+     */
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
 
     private AppState() {
@@ -105,7 +125,39 @@ public final class AppState {
         return theme;
     }
 
-    /** Clears edit history and edit counter (called when a new pattern loads). */
+    /**
+     * Undoes the last edit step; returns true when something was undone.
+     */
+    public boolean undo() {
+        PatternProject p = currentProject.get();
+        if (p == null) {
+            return false;
+        }
+        if (editHistory.undo(p.grid())) {
+            editCount.set(editCount.get() + 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Redoes the last undone edit step; returns true when something was redone.
+     */
+    public boolean redo() {
+        PatternProject p = currentProject.get();
+        if (p == null) {
+            return false;
+        }
+        if (editHistory.redo(p.grid())) {
+            editCount.set(editCount.get() + 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Clears edit history and edit counter (called when a new pattern loads).
+     */
     public void resetEditState() {
         editHistory.clear();
         editCount.set(0);
