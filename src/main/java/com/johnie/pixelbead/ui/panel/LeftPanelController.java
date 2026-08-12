@@ -10,6 +10,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
+import java.util.List;
+
 /**
  * Left panel: tools, undo/redo, board presets, custom board inputs,
  * interpolation and the pattern info line. Everything is written into the
@@ -67,6 +69,10 @@ public class LeftPanelController {
     private Label intensityValue;
     @FXML
     private CheckBox orphanCheck;
+    @FXML
+    private ComboBox<Double> mergeCombo;
+    @FXML
+    private Spinner<Integer> minBeadsSpinner;
     @FXML
     private Label patternInfoLabel;
 
@@ -229,7 +235,9 @@ public class LeftPanelController {
         interpolationCombo.valueProperty().bindBidirectional(state.interpolationProperty());
     }
 
-    /** Dithering algorithm, intensity slider and orphan cleaning (all live in AppState). */
+    /**
+     * Dithering algorithm, intensity slider and orphan cleaning (all live in AppState).
+     */
     private void setupDitheringControls() {
         ditheringCombo.setConverter(new StringConverter<>() {
             @Override
@@ -259,9 +267,70 @@ public class LeftPanelController {
 
         orphanCheck.selectedProperty().bindBidirectional(state.orphanCleanProperty());
         setIntensityVisible(state.ditheringProperty().get() != BeadEngine.Dithering.NONE);
+
+        setupMergeControls();
     }
 
-    /** Intensity is only meaningful when a dithering algorithm is active. */
+    /**
+     * Colour merge presets and the low-frequency protection threshold.
+     */
+    private void setupMergeControls() {
+        record Preset(String label, double threshold) {
+        }
+        List<Preset> presets = List.of(
+                new Preset("Off", 0.0),
+                new Preset("Conservative (ΔE 2)", 2.0),
+                new Preset("Standard (ΔE 4)", 4.0),
+                new Preset("Aggressive (ΔE 7)", 7.0));
+        for (Preset preset : presets) {
+            mergeCombo.getItems().add(preset.threshold());
+        }
+        mergeCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Double threshold) {
+                for (Preset preset : presets) {
+                    if (preset.threshold() == threshold) {
+                        return preset.label();
+                    }
+                }
+                return "Off";
+            }
+
+            @Override
+            public Double fromString(String s) {
+                return null;
+            }
+        });
+        // ComboBox holds boxed Double; sync to the primitive property via listener.
+        mergeCombo.valueProperty().addListener((obs, old, threshold) -> {
+            if (threshold != null) {
+                state.mergeThresholdProperty().set(threshold);
+            }
+        });
+        if (!mergeCombo.getItems().contains(state.mergeThresholdProperty().get())) {
+            state.mergeThresholdProperty().set(0.0);
+        }
+        mergeCombo.setValue(state.mergeThresholdProperty().get());
+
+        minBeadsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 10));
+        // Spinner value is read-only; sync to the shared state via listener.
+        // Editable spinners can commit out-of-range values (e.g. 0), so clamp
+        // and echo the corrected value back.
+        minBeadsSpinner.valueProperty().addListener((obs, old, minBeads) -> {
+            if (minBeads == null) {
+                return;
+            }
+            int clamped = Math.max(0, minBeads);
+            state.mergeMinBeadsProperty().set(clamped);
+            if (clamped != minBeads) {
+                minBeadsSpinner.getValueFactory().setValue(clamped);
+            }
+        });
+    }
+
+    /**
+     * Intensity is only meaningful when a dithering algorithm is active.
+     */
     private void setIntensityVisible(boolean visible) {
         intensityGroup.setVisible(visible);
         intensityGroup.setManaged(visible);

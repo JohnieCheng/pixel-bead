@@ -3,6 +3,7 @@ package com.johnie.pixelbead.engine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
+import com.johnie.pixelbead.engine.quantizer.ColorDifference;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -191,7 +192,7 @@ class BeadEngineTest {
         PatternProject legacy = BeadEngine.processImage(img, BOARD, palette, ImageDownsampler.Interpolation.BILINEAR);
         PatternProject options = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, false));
+                        BeadEngine.Dithering.NONE, 1.0, false, 0.0, 10));
         assertArrayEquals(legacy.grid(), options.grid());
     }
 
@@ -200,10 +201,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject none = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, false));
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, false, 0.0, 10));
         PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, false));
+                        BeadEngine.Dithering.NONE, 1.0, false, 0.0, 10));
         assertArrayEquals(plain.grid(), none.grid());
     }
 
@@ -212,10 +213,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, false));
+                        BeadEngine.Dithering.NONE, 1.0, false, 0.0, 10));
         PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false));
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false, 0.0, 10));
         assertFalse(Arrays.equals(plain.grid(), dithered.grid()),
                 "dithering should alter the quantized grid");
     }
@@ -236,13 +237,118 @@ class BeadEngineTest {
         }
         PatternProject cleaned = BeadEngine.processImage(img, small, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, true));
+                        BeadEngine.Dithering.NONE, 1.0, true, 0.0, 10));
         int[][] result = cleaned.grid();
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
                 assertEquals(1, result[y][x], "isolated cell should merge into colour 1");
             }
         }
+    }
+
+    @Test
+    void mergeCollapsesLowFrequencyColour() {
+        // Find the closest palette pair to guarantee a sub-threshold merge.
+        double bestDe = Double.MAX_VALUE;
+        int a = 0;
+        int b = 1;
+        for (int i = 0; i < palette.size(); i++) {
+            for (int j = i + 1; j < palette.size(); j++) {
+                double de = ColorDifference.de2000(palette.colorAt(i).lab(), palette.colorAt(j).lab());
+                if (de < bestDe) {
+                    bestDe = de;
+                    a = i;
+                    b = j;
+                }
+            }
+        }
+        assertTrue(bestDe < 4.0, "palette should contain a pair within ΔE 4");
+        // 5x5 image: colour a everywhere except a single cell of colour b.
+        BufferedImage img = new BufferedImage(5, 5, BufferedImage.TYPE_INT_ARGB);
+        int argbA = colorArgb(a);
+        int argbB = colorArgb(b);
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                img.setRGB(x, y, (x == 2 && y == 2) ? argbB : argbA);
+            }
+        }
+        PatternProject merged = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Dithering.NONE, 1.0, false, 4.0, 10));
+        for (int[] row : merged.grid()) {
+            for (int cell : row) {
+                assertNotEquals(b, cell, "low-frequency colour should be merged away");
+            }
+        }
+    }
+
+    @Test
+    void mergeProtectsHighFrequencyColour() {
+        // Find a close pair again (a = majority, b = minority).
+        double bestDe = Double.MAX_VALUE;
+        int a = 0;
+        int b = 1;
+        for (int i = 0; i < palette.size(); i++) {
+            for (int j = i + 1; j < palette.size(); j++) {
+                double de = ColorDifference.de2000(palette.colorAt(i).lab(), palette.colorAt(j).lab());
+                if (de < bestDe) {
+                    bestDe = de;
+                    a = i;
+                    b = j;
+                }
+            }
+        }
+        // 10x10 image: 60 cells of colour a (>= minBeads), 1 cell of b.
+        BufferedImage img = new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                img.setRGB(x, y, (x + y < 1) ? colorArgb(b) : colorArgb(a));
+            }
+        }
+        PatternProject merged = BeadEngine.processImage(img, new BeadBoard(10, 10, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Dithering.NONE, 1.0, false, 4.0, 10));
+        int countA = 0;
+        for (int[] row : merged.grid()) {
+            for (int cell : row) {
+                if (cell == a) {
+                    countA++;
+                }
+            }
+        }
+        assertEquals(100, countA, "majority colour must survive and absorb the minority");
+    }
+
+    @Test
+    void mergeReducesColourCountAfterDithering() {
+        BufferedImage img = gradientImage();
+        PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false, 0.0, 10));
+        PatternProject merged = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false, 7.0, 10));
+        int coloursD = distinctColours(dithered.grid());
+        int coloursM = distinctColours(merged.grid());
+        assertTrue(coloursM <= coloursD,
+                "merging should not increase the colour count (" + coloursM + " > " + coloursD + ")");
+    }
+
+    private static int distinctColours(int[][] grid) {
+        java.util.Set<Integer> seen = new java.util.HashSet<>();
+        for (int[] row : grid) {
+            for (int cell : row) {
+                if (cell >= 0) {
+                    seen.add(cell);
+                }
+            }
+        }
+        return seen.size();
+    }
+
+    private static int colorArgb(int index) {
+        return 0xFF000000 | (palette.colorAt(index).r() << 16)
+                | (palette.colorAt(index).g() << 8) | palette.colorAt(index).b();
     }
 
     private static BufferedImage gradientImage() {

@@ -3,11 +3,13 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox styleClass="side-panel" spacing="8" prefWidth="230" xmlns:fx="http://javafx.com/fxml"
+<?import javafx.scene.control.ScrollPane?>
+<ScrollPane fitToWidth="true" styleClass="side-scroll" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.johnie.pixelbead.ui.panel.LeftPanelController">
-    <padding>
-        <Insets top="12" right="12" bottom="12" left="12"/>
-    </padding>
+    <VBox styleClass="side-panel" spacing="8" prefWidth="230" maxWidth="Infinity">
+        <padding>
+            <Insets top="12" right="12" bottom="12" left="12"/>
+        </padding>
     <Label styleClass="panel-title" text="Tools"/>
     <HBox spacing="6">
         <ToggleButton fx:id="brushTool" text="Brush" maxWidth="Infinity" HBox.hgrow="ALWAYS" selected="true"/>
@@ -43,15 +45,24 @@
     <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
     <Label text="Dithering"/>
     <ComboBox fx:id="ditheringCombo" maxWidth="Infinity"/>
-    <VBox fx:id="intensityGroup" spacing="6">
-        <Label text="Intensity"/>
-        <HBox spacing="6">
-            <Slider fx:id="intensitySlider" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-            <Label fx:id="intensityValue" text="25%"/>
-        </HBox>
-    </VBox>
-    <CheckBox fx:id="orphanCheck" text="Orphan pixel cleaning"/>
+    <TitledPane text="Advanced" expanded="false" maxWidth="Infinity">
+        <VBox spacing="8">
+            <VBox fx:id="intensityGroup" spacing="6">
+                <Label text="Intensity"/>
+                <HBox spacing="6">
+                    <Slider fx:id="intensitySlider" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                    <Label fx:id="intensityValue" text="0%"/>
+                </HBox>
+            </VBox>
+            <CheckBox fx:id="orphanCheck" text="Orphan pixel cleaning"/>
+            <Label text="Color Merge"/>
+            <ComboBox fx:id="mergeCombo" maxWidth="Infinity"/>
+            <Label text="Min beads"/>
+            <Spinner fx:id="minBeadsSpinner" editable="true" maxWidth="Infinity"/>
+        </VBox>
+    </TitledPane>
     <Separator/>
     <Label styleClass="panel-title" text="Pattern"/>
     <Label fx:id="patternInfoLabel" wrapText="true" styleClass="pattern-info"/>
-</VBox>
+    </VBox>
+</ScrollPane>

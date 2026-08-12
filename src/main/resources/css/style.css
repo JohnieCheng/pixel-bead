@@ -414,6 +414,14 @@
     -fx-background-color: transparent;
 }
 
+.side-scroll {
+    -fx-background-color: transparent;
+}
+
+.side-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
 .loading-overlay {
     -fx-background-color: -pixel-overlay;
 }

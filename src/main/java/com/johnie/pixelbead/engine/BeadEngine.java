@@ -3,6 +3,7 @@ package com.johnie.pixelbead.engine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
+import com.johnie.pixelbead.engine.quantizer.ColorDifference;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
 
 import java.awt.image.BufferedImage;
@@ -44,15 +45,23 @@ public final class BeadEngine {
     public record ConversionOptions(ImageDownsampler.Interpolation interpolation,
                                     Dithering dithering,
                                     double ditheringStrength,
-                                    boolean orphanClean) {
+                                    boolean orphanClean,
+                                    double mergeThreshold,
+                                    int mergeMinBeads) {
         public ConversionOptions {
             if (ditheringStrength < 0 || ditheringStrength > 1) {
                 throw new IllegalArgumentException("dithering strength must be in [0,1]");
             }
+            if (mergeThreshold < 0) {
+                throw new IllegalArgumentException("merge threshold must be >= 0");
+            }
+            if (mergeMinBeads < 0) {
+                throw new IllegalArgumentException("merge min beads must be >= 0");
+            }
         }
 
         public static ConversionOptions plain(ImageDownsampler.Interpolation interpolation) {
-            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, false);
+            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, false, 0.0, 10);
         }
     }
 
@@ -99,10 +108,79 @@ public final class BeadEngine {
         int[][] grid = options.dithering() == Dithering.NONE
                 ? quantizePlain(scaled, gridW, gridH, offsetX, offsetY, palette)
                 : quantizeDithered(scaled, gridW, gridH, offsetX, offsetY, palette, options);
+        if (options.mergeThreshold() > 0) {
+            grid = mergeSimilarColors(grid, palette, options.mergeThreshold(), options.mergeMinBeads());
+        }
         if (options.orphanClean()) {
             grid = cleanOrphans(grid);
         }
         return new PatternProject(board, palette, grid);
+    }
+
+    /**
+     * Merges low-frequency colours into their perceptually closest existing
+     * colour when the ΔE2000 gap is below the threshold. Colours used at least
+     * {@code minBeads} times are protected and never merged away.
+     */
+    private static int[][] mergeSimilarColors(int[][] grid, BeadPalette palette,
+                                              double threshold, int minBeads) {
+        int gridH = grid.length;
+        int gridW = grid[0].length;
+        int[] counts = new int[palette.size()];
+        for (int[] row : grid) {
+            for (int cell : row) {
+                if (cell >= 0) {
+                    counts[cell]++;
+                }
+            }
+        }
+        // Palette indices ordered by usage, most used first.
+        Integer[] order = new Integer[palette.size()];
+        for (int i = 0; i < order.length; i++) {
+            order[i] = i;
+        }
+        Arrays.sort(order, (a, b) -> Integer.compare(counts[b], counts[a]));
+
+        boolean[] removed = new boolean[palette.size()];
+        boolean changed;
+        do {
+            changed = false;
+            for (int i = order.length - 1; i >= 0; i--) {
+                int from = order[i];
+                if (removed[from] || counts[from] == 0 || counts[from] >= minBeads) {
+                    continue;
+                }
+                // Only more frequent colours are candidates (small merges into big).
+                int best = -1;
+                double bestDe = threshold;
+                for (int j = 0; j < i; j++) {
+                    int to = order[j];
+                    if (removed[to] || counts[to] == 0) {
+                        continue;
+                    }
+                    double de = ColorDifference.de2000(palette.colorAt(from).lab(), palette.colorAt(to).lab());
+                    if (de < bestDe) {
+                        bestDe = de;
+                        best = to;
+                    }
+                }
+                if (best >= 0) {
+                    int total = counts[from];
+                    for (int y = 0; y < gridH; y++) {
+                        for (int x = 0; x < gridW; x++) {
+                            if (grid[y][x] == from) {
+                                grid[y][x] = best;
+                            }
+                        }
+                    }
+                    counts[best] += total;
+                    counts[from] = 0;
+                    removed[from] = true;
+                    changed = true;
+                }
+            }
+        } while (changed);
+        return grid;
     }
 
     /**

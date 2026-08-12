@@ -61,6 +61,8 @@ public final class ConversionCoordinator {
         state.ditheringProperty().addListener(obs -> regenerate());
         state.ditheringStrengthProperty().addListener(obs -> regenerate());
         state.orphanCleanProperty().addListener(obs -> regenerate());
+        state.mergeThresholdProperty().addListener(obs -> regenerate());
+        state.mergeMinBeadsProperty().addListener(obs -> regenerate());
     }
 
     /**
@@ -127,7 +129,9 @@ public final class ConversionCoordinator {
                 interpolation,
                 state.ditheringProperty().get(),
                 state.ditheringStrengthProperty().get(),
-                state.orphanCleanProperty().get());
+                state.orphanCleanProperty().get(),
+                state.mergeThresholdProperty().get(),
+                Math.max(0, state.mergeMinBeadsProperty().get()));
 
         Task<PatternProject> task = TaskUtil.call(() ->
                 BeadEngine.processImage(source, effectiveBoard, palette, options));

@@ -81,13 +81,23 @@ public final class AppState {
             new SimpleObjectProperty<>(BeadEngine.Dithering.NONE);
     /**
      * Error diffusion share in [0,1]; 0 disables the diffusion effect.
-     * Defaults to 0.25: light diffusion keeps the pattern clean.
+     * Advanced parameters default to off; users opt in via the panel.
      */
-    private final DoubleProperty ditheringStrength = new SimpleDoubleProperty(0.25);
+    private final DoubleProperty ditheringStrength = new SimpleDoubleProperty(0.0);
     /**
      * Merges isolated single beads into their surrounding colour.
      */
     private final BooleanProperty orphanClean = new SimpleBooleanProperty(false);
+    /**
+     * Similarity tolerance for colour merging (ΔE2000); 0 disables merging.
+     * Advanced parameters default to off; users opt in via the panel.
+     */
+    private final DoubleProperty mergeThreshold = new SimpleDoubleProperty(0.0);
+    /**
+     * Colours used fewer than this many beads may be merged away; larger
+     * colours are protected.
+     */
+    private final IntegerProperty mergeMinBeads = new SimpleIntegerProperty(10);
     /**
      * Active color theme; light is the default.
      */
@@ -150,6 +160,14 @@ public final class AppState {
 
     public BooleanProperty orphanCleanProperty() {
         return orphanClean;
+    }
+
+    public DoubleProperty mergeThresholdProperty() {
+        return mergeThreshold;
+    }
+
+    public IntegerProperty mergeMinBeadsProperty() {
+        return mergeMinBeads;
     }
 
     public ObjectProperty<Theme> themeProperty() {
