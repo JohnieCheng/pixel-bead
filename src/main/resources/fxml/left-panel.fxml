@@ -41,6 +41,16 @@
     </HBox>
     <Label text="Interpolation"/>
     <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
+    <Label text="Dithering"/>
+    <ComboBox fx:id="ditheringCombo" maxWidth="Infinity"/>
+    <VBox fx:id="intensityGroup" spacing="6">
+        <Label text="Intensity"/>
+        <HBox spacing="6">
+            <Slider fx:id="intensitySlider" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <Label fx:id="intensityValue" text="25%"/>
+        </HBox>
+    </VBox>
+    <CheckBox fx:id="orphanCheck" text="Orphan pixel cleaning"/>
     <Separator/>
     <Label styleClass="panel-title" text="Pattern"/>
     <Label fx:id="patternInfoLabel" wrapText="true" styleClass="pattern-info"/>

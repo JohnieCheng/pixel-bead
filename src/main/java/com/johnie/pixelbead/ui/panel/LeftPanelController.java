@@ -1,5 +1,6 @@
 package com.johnie.pixelbead.ui.panel;
 
+import com.johnie.pixelbead.engine.BeadEngine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
@@ -57,6 +58,16 @@ public class LeftPanelController {
     @FXML
     private ComboBox<ImageDownsampler.Interpolation> interpolationCombo;
     @FXML
+    private ComboBox<BeadEngine.Dithering> ditheringCombo;
+    @FXML
+    private VBox intensityGroup;
+    @FXML
+    private Slider intensitySlider;
+    @FXML
+    private Label intensityValue;
+    @FXML
+    private CheckBox orphanCheck;
+    @FXML
     private Label patternInfoLabel;
 
     private boolean customBoardInitialized = false;
@@ -66,6 +77,7 @@ public class LeftPanelController {
         setupTools();
         setupBoardControls();
         setupInterpolationControl();
+        setupDitheringControls();
         setupPatternInfo();
         refreshHistoryButtons();
         state.editCountProperty().addListener(obs -> refreshHistoryButtons());
@@ -215,6 +227,44 @@ public class LeftPanelController {
         });
         interpolationCombo.getItems().addAll(ImageDownsampler.Interpolation.values());
         interpolationCombo.valueProperty().bindBidirectional(state.interpolationProperty());
+    }
+
+    /** Dithering algorithm, intensity slider and orphan cleaning (all live in AppState). */
+    private void setupDitheringControls() {
+        ditheringCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(BeadEngine.Dithering d) {
+                return switch (d) {
+                    case NONE -> "None";
+                    case FLOYD_STEINBERG -> "Floyd-Steinberg";
+                    case ATKINSON -> "Atkinson";
+                };
+            }
+
+            @Override
+            public BeadEngine.Dithering fromString(String s) {
+                return null;
+            }
+        });
+        ditheringCombo.getItems().addAll(BeadEngine.Dithering.values());
+        ditheringCombo.valueProperty().bindBidirectional(state.ditheringProperty());
+        ditheringCombo.valueProperty().addListener((obs, old, dithering) ->
+                setIntensityVisible(dithering != BeadEngine.Dithering.NONE));
+
+        intensitySlider.setMin(0);
+        intensitySlider.setMax(1);
+        intensitySlider.valueProperty().bindBidirectional(state.ditheringStrengthProperty());
+        intensityValue.textProperty().bind(intensitySlider.valueProperty()
+                .map(v -> Math.round(v.doubleValue() * 100) + "%"));
+
+        orphanCheck.selectedProperty().bindBidirectional(state.orphanCleanProperty());
+        setIntensityVisible(state.ditheringProperty().get() != BeadEngine.Dithering.NONE);
+    }
+
+    /** Intensity is only meaningful when a dithering algorithm is active. */
+    private void setIntensityVisible(boolean visible) {
+        intensityGroup.setVisible(visible);
+        intensityGroup.setManaged(visible);
     }
 
     /**

@@ -58,6 +58,9 @@ public final class ConversionCoordinator {
         state.boardColumnsProperty().addListener(obs -> regenerate());
         state.boardRowsProperty().addListener(obs -> regenerate());
         state.interpolationProperty().addListener(obs -> regenerate());
+        state.ditheringProperty().addListener(obs -> regenerate());
+        state.ditheringStrengthProperty().addListener(obs -> regenerate());
+        state.orphanCleanProperty().addListener(obs -> regenerate());
     }
 
     /**
@@ -120,8 +123,14 @@ public final class ConversionCoordinator {
         ImageDownsampler.Interpolation interpolation = state.interpolationProperty().get();
         BufferedImage source = sourceImage;
 
+        BeadEngine.ConversionOptions options = new BeadEngine.ConversionOptions(
+                interpolation,
+                state.ditheringProperty().get(),
+                state.ditheringStrengthProperty().get(),
+                state.orphanCleanProperty().get());
+
         Task<PatternProject> task = TaskUtil.call(() ->
-                BeadEngine.processImage(source, effectiveBoard, palette, interpolation));
+                BeadEngine.processImage(source, effectiveBoard, palette, options));
         task.setOnRunning(e -> showOverlay());
         task.setOnSucceeded(e -> {
             if (generation != conversionGeneration) {

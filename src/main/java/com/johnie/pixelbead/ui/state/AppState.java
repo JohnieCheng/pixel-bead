@@ -1,11 +1,16 @@
 package com.johnie.pixelbead.ui.state;
 
+import com.johnie.pixelbead.engine.BeadEngine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -70,6 +75,20 @@ public final class AppState {
      */
     private final IntegerProperty replaceFromIndex = new SimpleIntegerProperty(-1);
     /**
+     * Error diffusion algorithm used for the conversion.
+     */
+    private final ObjectProperty<BeadEngine.Dithering> dithering =
+            new SimpleObjectProperty<>(BeadEngine.Dithering.NONE);
+    /**
+     * Error diffusion share in [0,1]; 0 disables the diffusion effect.
+     * Defaults to 0.25: light diffusion keeps the pattern clean.
+     */
+    private final DoubleProperty ditheringStrength = new SimpleDoubleProperty(0.25);
+    /**
+     * Merges isolated single beads into their surrounding colour.
+     */
+    private final BooleanProperty orphanClean = new SimpleBooleanProperty(false);
+    /**
      * Active color theme; light is the default.
      */
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
@@ -119,6 +138,18 @@ public final class AppState {
 
     public IntegerProperty replaceFromIndexProperty() {
         return replaceFromIndex;
+    }
+
+    public ObjectProperty<BeadEngine.Dithering> ditheringProperty() {
+        return dithering;
+    }
+
+    public DoubleProperty ditheringStrengthProperty() {
+        return ditheringStrength;
+    }
+
+    public BooleanProperty orphanCleanProperty() {
+        return orphanClean;
     }
 
     public ObjectProperty<Theme> themeProperty() {

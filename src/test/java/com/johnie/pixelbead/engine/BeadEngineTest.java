@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -182,5 +183,78 @@ class BeadEngineTest {
         assertEquals(blackIdx, grid[0][0]);
         assertEquals(whiteIdx, grid[0][28]);
         assertTrue(grid[28][28] == blackIdx || grid[28][28] == whiteIdx);
+    }
+
+    @Test
+    void plainOptionsMatchLegacyConversion() {
+        BufferedImage img = gradientImage();
+        PatternProject legacy = BeadEngine.processImage(img, BOARD, palette, ImageDownsampler.Interpolation.BILINEAR);
+        PatternProject options = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.NONE, 1.0, false));
+        assertArrayEquals(legacy.grid(), options.grid());
+    }
+
+    @Test
+    void zeroStrengthEqualsNoDithering() {
+        BufferedImage img = gradientImage();
+        PatternProject none = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, false));
+        PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.NONE, 1.0, false));
+        assertArrayEquals(plain.grid(), none.grid());
+    }
+
+    @Test
+    void ditheringChangesOutput() {
+        BufferedImage img = gradientImage();
+        PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.NONE, 1.0, false));
+        PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false));
+        assertFalse(Arrays.equals(plain.grid(), dithered.grid()),
+                "dithering should alter the quantized grid");
+    }
+
+    @Test
+    void orphanCleanRemovesIsolatedCell() {
+        BeadBoard small = new BeadBoard(3, 3, 2.6, 10);
+        int r1 = palette.colorAt(1).r(), g1 = palette.colorAt(1).g(), b1 = palette.colorAt(1).b();
+        int r2 = palette.colorAt(2).r(), g2 = palette.colorAt(2).g(), b2 = palette.colorAt(2).b();
+        BufferedImage img = new BufferedImage(3, 3, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                boolean centre = x == 1 && y == 1;
+                int argb = centre ? (0xFF000000 | (r2 << 16) | (g2 << 8) | b2)
+                        : (0xFF000000 | (r1 << 16) | (g1 << 8) | b1);
+                img.setRGB(x, y, argb);
+            }
+        }
+        PatternProject cleaned = BeadEngine.processImage(img, small, palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Dithering.NONE, 1.0, true));
+        int[][] result = cleaned.grid();
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                assertEquals(1, result[y][x], "isolated cell should merge into colour 1");
+            }
+        }
+    }
+
+    private static BufferedImage gradientImage() {
+        BufferedImage img = new BufferedImage(64, 48, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 48; y++) {
+            for (int x = 0; x < 64; x++) {
+                int r = (int) (255.0 * x / 64);
+                int g = (int) (255.0 * y / 48);
+                int b = (r + g) / 2;
+                img.setRGB(x, y, (0xFF << 24) | (r << 16) | (g << 8) | b);
+            }
+        }
+        return img;
     }
 }
