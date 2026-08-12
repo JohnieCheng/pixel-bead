@@ -57,7 +57,7 @@
             <CheckBox fx:id="orphanCheck" text="Orphan pixel cleaning"/>
             <Label text="Color Merge"/>
             <ComboBox fx:id="mergeCombo" maxWidth="Infinity"/>
-            <Label text="Min beads"/>
+            <Label text="Min share (%)"/>
             <Spinner fx:id="minBeadsSpinner" editable="true" maxWidth="Infinity"/>
         </VBox>
     </TitledPane>

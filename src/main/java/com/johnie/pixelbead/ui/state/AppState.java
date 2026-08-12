@@ -94,10 +94,10 @@ public final class AppState {
      */
     private final DoubleProperty mergeThreshold = new SimpleDoubleProperty(0.0);
     /**
-     * Colours used fewer than this many beads may be merged away; larger
-     * colours are protected.
+     * Colours used by fewer than this share (percent of filled cells) may be
+     * merged away; larger colours are protected.
      */
-    private final IntegerProperty mergeMinBeads = new SimpleIntegerProperty(10);
+    private final IntegerProperty mergeMinShare = new SimpleIntegerProperty(1);
     /**
      * Active color theme; light is the default.
      */
@@ -166,8 +166,8 @@ public final class AppState {
         return mergeThreshold;
     }
 
-    public IntegerProperty mergeMinBeadsProperty() {
-        return mergeMinBeads;
+    public IntegerProperty mergeMinShareProperty() {
+        return mergeMinShare;
     }
 
     public ObjectProperty<Theme> themeProperty() {

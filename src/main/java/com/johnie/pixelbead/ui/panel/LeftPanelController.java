@@ -272,7 +272,7 @@ public class LeftPanelController {
     }
 
     /**
-     * Colour merge presets and the low-frequency protection threshold.
+     * Colour merge presets and the low-frequency share threshold.
      */
     private void setupMergeControls() {
         record Preset(String label, double threshold) {
@@ -281,7 +281,8 @@ public class LeftPanelController {
                 new Preset("Off", 0.0),
                 new Preset("Conservative (ΔE 2)", 2.0),
                 new Preset("Standard (ΔE 4)", 4.0),
-                new Preset("Aggressive (ΔE 7)", 7.0));
+                new Preset("Aggressive (ΔE 7)", 7.0),
+                new Preset("Extreme (ΔE 12)", 12.0));
         for (Preset preset : presets) {
             mergeCombo.getItems().add(preset.threshold());
         }
@@ -312,17 +313,17 @@ public class LeftPanelController {
         }
         mergeCombo.setValue(state.mergeThresholdProperty().get());
 
-        minBeadsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 10));
+        minBeadsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
         // Spinner value is read-only; sync to the shared state via listener.
         // Editable spinners can commit out-of-range values (e.g. 0), so clamp
         // and echo the corrected value back.
-        minBeadsSpinner.valueProperty().addListener((obs, old, minBeads) -> {
-            if (minBeads == null) {
+        minBeadsSpinner.valueProperty().addListener((obs, old, minShare) -> {
+            if (minShare == null) {
                 return;
             }
-            int clamped = Math.max(0, minBeads);
-            state.mergeMinBeadsProperty().set(clamped);
-            if (clamped != minBeads) {
+            int clamped = Math.max(0, Math.min(100, minShare));
+            state.mergeMinShareProperty().set(clamped);
+            if (clamped != minShare) {
                 minBeadsSpinner.getValueFactory().setValue(clamped);
             }
         });

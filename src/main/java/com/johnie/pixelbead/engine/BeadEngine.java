@@ -47,7 +47,7 @@ public final class BeadEngine {
                                     double ditheringStrength,
                                     boolean orphanClean,
                                     double mergeThreshold,
-                                    int mergeMinBeads) {
+                                    int mergeMinShare) {
         public ConversionOptions {
             if (ditheringStrength < 0 || ditheringStrength > 1) {
                 throw new IllegalArgumentException("dithering strength must be in [0,1]");
@@ -55,13 +55,13 @@ public final class BeadEngine {
             if (mergeThreshold < 0) {
                 throw new IllegalArgumentException("merge threshold must be >= 0");
             }
-            if (mergeMinBeads < 0) {
-                throw new IllegalArgumentException("merge min beads must be >= 0");
+            if (mergeMinShare < 0 || mergeMinShare > 100) {
+                throw new IllegalArgumentException("merge min share must be in [0,100]");
             }
         }
 
         public static ConversionOptions plain(ImageDownsampler.Interpolation interpolation) {
-            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, false, 0.0, 10);
+            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, false, 0.0, 1);
         }
     }
 
@@ -109,7 +109,7 @@ public final class BeadEngine {
                 ? quantizePlain(scaled, gridW, gridH, offsetX, offsetY, palette)
                 : quantizeDithered(scaled, gridW, gridH, offsetX, offsetY, palette, options);
         if (options.mergeThreshold() > 0) {
-            grid = mergeSimilarColors(grid, palette, options.mergeThreshold(), options.mergeMinBeads());
+            grid = mergeSimilarColors(grid, palette, options.mergeThreshold(), options.mergeMinShare());
         }
         if (options.orphanClean()) {
             grid = cleanOrphans(grid);
@@ -119,21 +119,25 @@ public final class BeadEngine {
 
     /**
      * Merges low-frequency colours into their perceptually closest existing
-     * colour when the ΔE2000 gap is below the threshold. Colours used at least
-     * {@code minBeads} times are protected and never merged away.
+     * colour when the ΔE2000 gap is below the threshold. A colour is only
+     * mergeable when its usage is below {@code minShare} percent of the filled
+     * cells; larger colours are protected.
      */
     private static int[][] mergeSimilarColors(int[][] grid, BeadPalette palette,
-                                              double threshold, int minBeads) {
+                                              double threshold, int minShare) {
         int gridH = grid.length;
         int gridW = grid[0].length;
         int[] counts = new int[palette.size()];
+        int totalCells = 0;
         for (int[] row : grid) {
             for (int cell : row) {
                 if (cell >= 0) {
                     counts[cell]++;
+                    totalCells++;
                 }
             }
         }
+        double minCount = totalCells * minShare / 100.0;
         // Palette indices ordered by usage, most used first.
         Integer[] order = new Integer[palette.size()];
         for (int i = 0; i < order.length; i++) {
@@ -147,7 +151,7 @@ public final class BeadEngine {
             changed = false;
             for (int i = order.length - 1; i >= 0; i--) {
                 int from = order[i];
-                if (removed[from] || counts[from] == 0 || counts[from] >= minBeads) {
+                if (removed[from] || counts[from] == 0 || counts[from] >= minCount) {
                     continue;
                 }
                 // Only more frequent colours are candidates (small merges into big).
