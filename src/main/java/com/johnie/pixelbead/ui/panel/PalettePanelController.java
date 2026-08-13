@@ -11,7 +11,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.util.StringConverter;
 
 import java.io.IOException;
 
@@ -40,6 +39,11 @@ public class PalettePanelController {
             this.label = label;
             this.resource = resource;
         }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 
     private final AppState state = AppState.get();
@@ -56,19 +60,8 @@ public class PalettePanelController {
 
     @FXML
     private void initialize() {
-        paletteCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(PaletteChoice choice) {
-                return choice.label;
-            }
-
-            @Override
-            public PaletteChoice fromString(String s) {
-                return null;
-            }
-        });
         paletteCombo.getItems().addAll(PaletteChoice.values());
-        paletteCombo.setValue(PaletteChoice.FULL_291);
+        paletteCombo.setValue(PaletteChoice.STANDARD_221);
         paletteCombo.valueProperty().addListener((obs, old, choice) -> {
             if (choice == null) {
                 return;

@@ -11,7 +11,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
-import javafx.util.StringConverter;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -41,21 +40,6 @@ public final class ExportCoordinator {
     }
 
     public void setup() {
-        formatCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(ExportFormat format) {
-                return switch (format) {
-                    case PNG -> "PNG";
-                    case PDF -> "PDF";
-                    case TEXT -> "Text";
-                };
-            }
-
-            @Override
-            public ExportFormat fromString(String s) {
-                return null;
-            }
-        });
         formatCombo.getItems().addAll(ExportFormat.values());
         formatCombo.setValue(ExportFormat.PNG);
         exportButton.disableProperty().bind(state.currentProjectProperty().isNull());
@@ -131,6 +115,17 @@ public final class ExportCoordinator {
      * Supported export formats.
      */
     public enum ExportFormat {
-        PNG, PDF, TEXT
+        PNG("PNG"), PDF("PDF"), TEXT("Text");
+
+        private final String label;
+
+        ExportFormat(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 }

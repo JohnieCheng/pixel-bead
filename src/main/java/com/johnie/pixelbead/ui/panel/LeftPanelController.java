@@ -8,7 +8,6 @@ import com.johnie.pixelbead.ui.state.AppState;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.util.StringConverter;
 
 import java.util.List;
 
@@ -70,9 +69,9 @@ public class LeftPanelController {
     @FXML
     private Label intensityValue;
     @FXML
-    private ComboBox<Integer> orphanCombo;
+    private ComboBox<OrphanLevel> orphanCombo;
     @FXML
-    private ComboBox<Double> mergeCombo;
+    private ComboBox<MergePreset> mergeCombo;
     @FXML
     private VBox minShareGroup;
     @FXML
@@ -273,86 +272,85 @@ public class LeftPanelController {
     /**
      * Orphan cleaning strength: Off / Light / Medium / Strong.
      */
-    private void setupOrphanControls() {
-        record Level(String label, int tolerance) {
-        }
-        List<Level> levels = List.of(
-                new Level("Off", 0),
-                new Level("Light", 1),
-                new Level("Medium", 2),
-                new Level("Strong", 3));
-        for (Level level : levels) {
-            orphanCombo.getItems().add(level.tolerance());
-        }
-        orphanCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(Integer tolerance) {
-                for (Level level : levels) {
-                    if (level.tolerance() == tolerance) {
-                        return level.label();
-                    }
-                }
-                return "Off";
-            }
+    private enum OrphanLevel {
+        OFF(0, "Off"), LIGHT(1, "Light"), MEDIUM(2, "Medium"), STRONG(3, "Strong");
 
-            @Override
-            public Integer fromString(String s) {
-                return null;
-            }
-        });
-        orphanCombo.valueProperty().addListener((obs, old, tolerance) -> {
-            if (tolerance != null) {
-                state.orphanToleranceProperty().set(tolerance);
-            }
-        });
-        if (!orphanCombo.getItems().contains(state.orphanToleranceProperty().get())) {
-            state.orphanToleranceProperty().set(0);
+        private final int tolerance;
+        private final String label;
+
+        OrphanLevel(int tolerance, String label) {
+            this.tolerance = tolerance;
+            this.label = label;
         }
-        orphanCombo.setValue(state.orphanToleranceProperty().get());
+
+        static OrphanLevel fromTolerance(int tolerance) {
+            for (OrphanLevel level : values()) {
+                if (level.tolerance == tolerance) {
+                    return level;
+                }
+            }
+            return OFF;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    private void setupOrphanControls() {
+        orphanCombo.getItems().addAll(OrphanLevel.values());
+        orphanCombo.valueProperty().addListener((obs, old, level) -> {
+            if (level != null) {
+                state.orphanToleranceProperty().set(level.tolerance);
+            }
+        });
+        orphanCombo.setValue(OrphanLevel.fromTolerance(state.orphanToleranceProperty().get()));
     }
 
     /**
      * Colour merge presets and the low-frequency share threshold.
      */
-    private void setupMergeControls() {
-        record Preset(String label, double threshold) {
-        }
-        List<Preset> presets = List.of(
-                new Preset("Off", 0.0),
-                new Preset("Conservative (ΔE 2)", 2.0),
-                new Preset("Standard (ΔE 4)", 4.0),
-                new Preset("Aggressive (ΔE 7)", 7.0),
-                new Preset("Extreme (ΔE 12)", 12.0));
-        for (Preset preset : presets) {
-            mergeCombo.getItems().add(preset.threshold());
-        }
-        mergeCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(Double threshold) {
-                for (Preset preset : presets) {
-                    if (preset.threshold() == threshold) {
-                        return preset.label();
-                    }
-                }
-                return "Off";
-            }
+    private enum MergePreset {
+        OFF(0.0, "Off"),
+        CONSERVATIVE(2.0, "Conservative (ΔE 2)"),
+        STANDARD(4.0, "Standard (ΔE 4)"),
+        AGGRESSIVE(7.0, "Aggressive (ΔE 7)"),
+        EXTREME(12.0, "Extreme (ΔE 12)");
 
-            @Override
-            public Double fromString(String s) {
-                return null;
-            }
-        });
-        // ComboBox holds boxed Double; sync to the primitive property via listener.
-        mergeCombo.valueProperty().addListener((obs, old, threshold) -> {
-            if (threshold != null) {
-                state.mergeThresholdProperty().set(threshold);
-                setMinShareVisible(threshold > 0);
-            }
-        });
-        if (!mergeCombo.getItems().contains(state.mergeThresholdProperty().get())) {
-            state.mergeThresholdProperty().set(0.0);
+        private final double threshold;
+        private final String label;
+
+        MergePreset(double threshold, String label) {
+            this.threshold = threshold;
+            this.label = label;
         }
-        mergeCombo.setValue(state.mergeThresholdProperty().get());
+
+        static MergePreset fromThreshold(double threshold) {
+            for (MergePreset preset : values()) {
+                if (preset.threshold == threshold) {
+                    return preset;
+                }
+            }
+            return OFF;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    private void setupMergeControls() {
+        mergeCombo.getItems().addAll(MergePreset.values());
+        // ComboBox item is the enum; sync its value to the primitive property.
+        mergeCombo.valueProperty().addListener((obs, old, preset) -> {
+            if (preset != null) {
+                state.mergeThresholdProperty().set(preset.threshold);
+                setMinShareVisible(preset.threshold > 0);
+            }
+        });
+        mergeCombo.setValue(MergePreset.fromThreshold(state.mergeThresholdProperty().get()));
         setMinShareVisible(state.mergeThresholdProperty().get() > 0);
 
         minBeadsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
