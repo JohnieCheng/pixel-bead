@@ -43,6 +43,8 @@
     </HBox>
     <Label text="Interpolation"/>
     <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
+    <Label text="Pixel mode"/>
+    <ComboBox fx:id="quantizationCombo" maxWidth="Infinity"/>
     <Label text="Dithering"/>
     <ComboBox fx:id="ditheringCombo" maxWidth="Infinity"/>
     <TitledPane text="Advanced" expanded="false" maxWidth="Infinity">

@@ -60,6 +60,8 @@ public class LeftPanelController {
     @FXML
     private ComboBox<ImageDownsampler.Interpolation> interpolationCombo;
     @FXML
+    private ComboBox<BeadEngine.Quantization> quantizationCombo;
+    @FXML
     private ComboBox<BeadEngine.Dithering> ditheringCombo;
     @FXML
     private VBox intensityGroup;
@@ -85,6 +87,7 @@ public class LeftPanelController {
         setupTools();
         setupBoardControls();
         setupInterpolationControl();
+        setupQuantizationControl();
         setupDitheringControls();
         setupPatternInfo();
         refreshHistoryButtons();
@@ -222,40 +225,34 @@ public class LeftPanelController {
     }
 
     private void setupInterpolationControl() {
-        interpolationCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(ImageDownsampler.Interpolation mode) {
-                return mode == ImageDownsampler.Interpolation.NEAREST ? "Nearest (pixel art)" : "Bilinear (photo)";
-            }
-
-            @Override
-            public ImageDownsampler.Interpolation fromString(String s) {
-                return null;
-            }
-        });
         interpolationCombo.getItems().addAll(ImageDownsampler.Interpolation.values());
         interpolationCombo.valueProperty().bindBidirectional(state.interpolationProperty());
+    }
+
+    /**
+     * Pixel mode (nearest sample vs region average); average disables dithering.
+     */
+    private void setupQuantizationControl() {
+        quantizationCombo.getItems().addAll(BeadEngine.Quantization.values());
+        quantizationCombo.valueProperty().bindBidirectional(state.quantizationProperty());
+        quantizationCombo.valueProperty().addListener((obs, old, quantization) ->
+                applyQuantizationDisables(quantization));
+        applyQuantizationDisables(state.quantizationProperty().get());
+    }
+
+    /**
+     * Dithering is meaningless on region-averaged cells.
+     */
+    private void applyQuantizationDisables(BeadEngine.Quantization quantization) {
+        boolean average = quantization == BeadEngine.Quantization.AVERAGE;
+        ditheringCombo.setDisable(average);
+        setIntensityVisible(!average && state.ditheringProperty().get() != BeadEngine.Dithering.NONE);
     }
 
     /**
      * Dithering algorithm, intensity slider and orphan cleaning (all live in AppState).
      */
     private void setupDitheringControls() {
-        ditheringCombo.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(BeadEngine.Dithering d) {
-                return switch (d) {
-                    case NONE -> "None";
-                    case FLOYD_STEINBERG -> "Floyd-Steinberg";
-                    case ATKINSON -> "Atkinson";
-                };
-            }
-
-            @Override
-            public BeadEngine.Dithering fromString(String s) {
-                return null;
-            }
-        });
         ditheringCombo.getItems().addAll(BeadEngine.Dithering.values());
         ditheringCombo.valueProperty().bindBidirectional(state.ditheringProperty());
         ditheringCombo.valueProperty().addListener((obs, old, dithering) ->
@@ -273,7 +270,9 @@ public class LeftPanelController {
         setupMergeControls();
     }
 
-    /** Orphan cleaning strength: Off / Light / Medium / Strong. */
+    /**
+     * Orphan cleaning strength: Off / Light / Medium / Strong.
+     */
     private void setupOrphanControls() {
         record Level(String label, int tolerance) {
         }
@@ -380,7 +379,9 @@ public class LeftPanelController {
         intensityGroup.setManaged(visible);
     }
 
-    /** Min share is only meaningful when colour merging is enabled. */
+    /**
+     * Min share is only meaningful when colour merging is enabled.
+     */
     private void setMinShareVisible(boolean visible) {
         minShareGroup.setVisible(visible);
         minShareGroup.setManaged(visible);

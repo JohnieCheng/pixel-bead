@@ -15,20 +15,6 @@ import java.awt.image.BufferedImage;
  */
 public final class ImageDownsampler {
 
-    /**
-     * Resampling mode.
-     */
-    public enum Interpolation {
-        /**
-         * Keep hard pixel edges (pixel art sources).
-         */
-        NEAREST,
-        /**
-         * Smooth interpolation (photographic sources).
-         */
-        BILINEAR
-    }
-
     private ImageDownsampler() {
     }
 
@@ -58,5 +44,30 @@ public final class ImageDownsampler {
             g.dispose();
         }
         return out;
+    }
+
+    /**
+     * Resampling mode.
+     */
+    public enum Interpolation {
+        /**
+         * Keep hard pixel edges (pixel art sources).
+         */
+        NEAREST("Nearest"),
+        /**
+         * Smooth interpolation (photographic sources).
+         */
+        BILINEAR("Bilinear");
+
+        private final String label;
+
+        Interpolation(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 }

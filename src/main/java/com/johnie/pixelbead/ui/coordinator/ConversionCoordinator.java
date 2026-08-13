@@ -5,6 +5,8 @@ import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import com.johnie.pixelbead.engine.recommend.ConversionRecommender;
+import com.johnie.pixelbead.engine.recommend.ConversionRecommender.RecommendedSettings;
 import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.dialogs.CropDialog;
 import com.johnie.pixelbead.ui.state.AppState;
@@ -59,6 +61,7 @@ public final class ConversionCoordinator {
         state.boardRowsProperty().addListener(obs -> regenerate());
         state.interpolationProperty().addListener(obs -> regenerate());
         state.paletteProperty().addListener(obs -> regenerate());
+        state.quantizationProperty().addListener(obs -> regenerate());
         state.ditheringProperty().addListener(obs -> regenerate());
         state.ditheringStrengthProperty().addListener(obs -> regenerate());
         state.orphanToleranceProperty().addListener(obs -> regenerate());
@@ -105,6 +108,33 @@ public final class ConversionCoordinator {
     }
 
     /**
+     * Analyses the current image and applies the recommended conversion
+     * settings (manual Auto button). Each property change re-runs the
+     * conversion via its listener.
+     */
+    public void applyRecommendedSettings() {
+        if (sourceImage == null) {
+            return;
+        }
+        RecommendedSettings rec = ConversionRecommender.recommend(sourceImage);
+        state.interpolationProperty().set(rec.interpolation());
+        state.ditheringProperty().set(rec.dithering());
+        state.ditheringStrengthProperty().set(rec.ditheringStrength());
+        state.orphanToleranceProperty().set(rec.orphanTolerance());
+        state.mergeThresholdProperty().set(rec.mergeThreshold());
+        Toasts.show(importButton, "Auto: " + describe(rec));
+    }
+
+    private static String describe(RecommendedSettings rec) {
+        String dither = switch (rec.dithering()) {
+            case NONE -> "flat colours";
+            case FLOYD_STEINBERG -> "photo dithering";
+            case ATKINSON -> "soft dithering";
+        };
+        return "detected " + dither + ", merge " + rec.mergeThreshold();
+    }
+
+    /**
      * Runs the conversion pipeline on a background thread. A stale task is
      * cancelled first and results from superseded generations are discarded,
      * so rapid parameter changes always land on the latest settings.
@@ -128,6 +158,7 @@ public final class ConversionCoordinator {
 
         BeadEngine.ConversionOptions options = new BeadEngine.ConversionOptions(
                 interpolation,
+                state.quantizationProperty().get(),
                 state.ditheringProperty().get(),
                 state.ditheringStrengthProperty().get(),
                 state.orphanToleranceProperty().get(),

@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -192,7 +193,7 @@ class BeadEngineTest {
         PatternProject legacy = BeadEngine.processImage(img, BOARD, palette, ImageDownsampler.Interpolation.BILINEAR);
         PatternProject options = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
         assertArrayEquals(legacy.grid(), options.grid());
     }
 
@@ -201,10 +202,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject none = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, 0, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, 0, 0.0, 1));
         PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
         assertArrayEquals(plain.grid(), none.grid());
     }
 
@@ -213,10 +214,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
         PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 0.0, 1));
         assertFalse(Arrays.equals(plain.grid(), dithered.grid()),
                 "dithering should alter the quantized grid");
     }
@@ -237,7 +238,7 @@ class BeadEngineTest {
         }
         PatternProject cleaned = BeadEngine.processImage(img, small, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, 1, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 1, 0.0, 1));
         int[][] result = cleaned.grid();
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
@@ -274,7 +275,7 @@ class BeadEngineTest {
         }
         PatternProject merged = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, 0, 4.0, 10));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 4.0, 10));
         for (int[] row : merged.grid()) {
             for (int cell : row) {
                 assertNotEquals(b, cell, "low-frequency colour should be merged away");
@@ -307,7 +308,7 @@ class BeadEngineTest {
         }
         PatternProject merged = BeadEngine.processImage(img, new BeadBoard(10, 10, 2.6, 10), palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, 0, 4.0, 10));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 4.0, 10));
         int countA = 0;
         for (int[] row : merged.grid()) {
             for (int cell : row) {
@@ -324,10 +325,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 0.0, 1));
         PatternProject merged = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 7.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 7.0, 1));
         int coloursD = distinctColours(dithered.grid());
         int coloursM = distinctColours(merged.grid());
         assertTrue(coloursM <= coloursD,
@@ -351,12 +352,57 @@ class BeadEngineTest {
         }
         PatternProject light = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, 1, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 1, 0.0, 1));
         PatternProject strong = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, 3, 0.0, 1));
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 3, 0.0, 1));
         assertEquals(2, light.grid()[2][1], "light cleaning must keep the pair");
         assertEquals(1, strong.grid()[2][1], "strong cleaning must merge the pair");
+    }
+
+    @Test
+    void averageModeSmoothsNoise() {
+        // Noisy gradient: region average quantizes to fewer distinct colours.
+        BufferedImage img = new BufferedImage(64, 64, BufferedImage.TYPE_INT_ARGB);
+        Random random = new Random(7);
+        for (int y = 0; y < 64; y++) {
+            for (int x = 0; x < 64; x++) {
+                int base = 120 + 20 * (x / 16);
+                int r = Math.max(0, Math.min(255, base + random.nextInt(40) - 20));
+                img.setRGB(x, y, 0xFF000000 | (r << 16) | ((255 - r) << 8) | 100);
+            }
+        }
+        PatternProject nearest = BeadEngine.processImage(img, new BeadBoard(16, 16, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+        PatternProject average = BeadEngine.processImage(img, new BeadBoard(16, 16, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
+                        BeadEngine.Quantization.AVERAGE, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+        assertTrue(distinctColours(average.grid()) <= distinctColours(nearest.grid()),
+                "average mode should not increase the colour count");
+    }
+
+    @Test
+    void averageModeFlatBlocksEqualNearest() {
+        // Flat colour blocks: region average reproduces the same palette hits.
+        BufferedImage img = new BufferedImage(32, 32, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 32; y++) {
+            for (int x = 0; x < 32; x++) {
+                int idx = (x / 16) + (y / 16) * 2;
+                int r = palette.colorAt(idx).r();
+                int g = palette.colorAt(idx).g();
+                int b = palette.colorAt(idx).b();
+                img.setRGB(x, y, 0xFF000000 | (r << 16) | (g << 8) | b);
+            }
+        }
+        PatternProject nearest = BeadEngine.processImage(img, new BeadBoard(8, 8, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Quantization.NEAREST, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+        PatternProject average = BeadEngine.processImage(img, new BeadBoard(8, 8, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Quantization.AVERAGE, BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
+        assertArrayEquals(nearest.grid(), average.grid(),
+                "flat blocks should produce identical grids in both modes");
     }
 
     private static int distinctColours(int[][] grid) {

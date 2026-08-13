@@ -34,15 +34,48 @@ public final class BeadEngine {
     /** Error diffusion algorithm used when quantizing. */
     public enum Dithering {
         /** Plain nearest-colour mapping (pixel art / flat areas). */
-        NONE,
+        NONE("None"),
         /** Floyd-Steinberg: error spread to 4 neighbours (7/16, 3/16, 5/16, 1/16). */
-        FLOYD_STEINBERG,
+        FLOYD_STEINBERG("Floyd-Steinberg"),
         /** Atkinson: gentler error spread to 6 neighbours (1/8 each), less noise. */
-        ATKINSON
+        ATKINSON("Atkinson");
+
+        private final String label;
+
+        Dithering(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
+    }
+
+    /**
+     * How a board cell picks its colour from the source.
+     */
+    public enum Quantization {
+        /** Sample the interpolated source pixel (current behaviour). */
+        NEAREST("Nearest"),
+        /** Average the whole source region covered by the cell (anti-noise). */
+        AVERAGE("Average");
+
+        private final String label;
+
+        Quantization(String label) {
+            this.label = label;
+        }
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 
     /** All conversion knobs, grouped. */
     public record ConversionOptions(ImageDownsampler.Interpolation interpolation,
+                                    Quantization quantization,
                                     Dithering dithering,
                                     double ditheringStrength,
                                     int orphanTolerance,
@@ -64,7 +97,7 @@ public final class BeadEngine {
         }
 
         public static ConversionOptions plain(ImageDownsampler.Interpolation interpolation) {
-            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, 0, 0.0, 1);
+            return new ConversionOptions(interpolation, Quantization.NEAREST, Dithering.NONE, 1.0, 0, 0.0, 1);
         }
     }
 
@@ -106,11 +139,17 @@ public final class BeadEngine {
         int offsetX = (gridW - scaledW) / 2;
         int offsetY = (gridH - scaledH) / 2;
 
-        BufferedImage scaled = ImageDownsampler.resize(src, scaledW, scaledH, options.interpolation());
-
-        int[][] grid = options.dithering() == Dithering.NONE
-                ? quantizePlain(scaled, gridW, gridH, offsetX, offsetY, palette)
-                : quantizeDithered(scaled, gridW, gridH, offsetX, offsetY, palette, options);
+        int[][] grid;
+        if (options.quantization() == Quantization.AVERAGE) {
+            // Region-average mode averages the source area per cell, which
+            // smooths noise; dithering is meaningless on averaged cells.
+            grid = quantizeAverage(src, gridW, gridH, offsetX, offsetY, scale, palette);
+        } else {
+            BufferedImage scaled = ImageDownsampler.resize(src, scaledW, scaledH, options.interpolation());
+            grid = options.dithering() == Dithering.NONE
+                    ? quantizePlain(scaled, gridW, gridH, offsetX, offsetY, palette)
+                    : quantizeDithered(scaled, gridW, gridH, offsetX, offsetY, palette, options);
+        }
         if (options.mergeThreshold() > 0) {
             grid = mergeSimilarColors(grid, palette, options.mergeThreshold(), options.mergeMinShare());
         }
@@ -118,6 +157,66 @@ public final class BeadEngine {
             grid = cleanOrphans(grid, options.orphanTolerance() - 1);
         }
         return new PatternProject(board, palette, grid);
+    }
+
+    /**
+     * Quantizes each cell from the average colour of the source region it
+     * covers (scaled-coordinate aligned). Transparent regions stay empty.
+     */
+    private static int[][] quantizeAverage(BufferedImage src, int gridW, int gridH,
+                                           int offsetX, int offsetY, double scale,
+                                           BeadPalette palette) {
+        int srcW = src.getWidth();
+        int srcH = src.getHeight();
+        // Use the same rounded scaled size as the fit-scale step, otherwise
+        // edge cells can fall outside the actual scaled image bounds.
+        double scaledW = Math.round(srcW * scale);
+        double scaledH = Math.round(srcH * scale);
+        int[][] grid = new int[gridH][gridW];
+        int[] row = new int[srcW];
+        for (int y = 0; y < gridH; y++) {
+            double sy0 = y - offsetY;
+            double sy1 = sy0 + 1;
+            if (sy1 <= 0 || sy0 >= scaledH) {
+                java.util.Arrays.fill(grid[y], -1);
+                continue;
+            }
+            int py0 = Math.max(0, (int) Math.floor(sy0 / scale));
+            int py1 = Math.min(srcH, (int) Math.ceil(sy1 / scale));
+            for (int x = 0; x < gridW; x++) {
+                double sx0 = x - offsetX;
+                double sx1 = sx0 + 1;
+                if (sx1 <= 0 || sx0 >= scaledW) {
+                    grid[y][x] = -1;
+                    continue;
+                }
+                int px0 = Math.max(0, (int) Math.floor(sx0 / scale));
+                int px1 = Math.min(srcW, (int) Math.ceil(sx1 / scale));
+                long sumR = 0;
+                long sumG = 0;
+                long sumB = 0;
+                long sumA = 0;
+                int n = 0;
+                for (int py = py0; py < py1; py++) {
+                    src.getRGB(px0, py, px1 - px0, 1, row, 0, srcW);
+                    for (int i = 0; i < px1 - px0; i++) {
+                        int argb = row[i];
+                        sumR += (argb >> 16) & 0xFF;
+                        sumG += (argb >> 8) & 0xFF;
+                        sumB += argb & 0xFF;
+                        sumA += (argb >>> 24) & 0xFF;
+                        n++;
+                    }
+                }
+                if (n == 0 || sumA / n < ALPHA_OPAQUE_THRESHOLD) {
+                    grid[y][x] = -1;
+                    continue;
+                }
+                grid[y][x] = palette.nearestIndex(
+                        (int) (sumR / n), (int) (sumG / n), (int) (sumB / n));
+            }
+        }
+        return grid;
     }
 
     /**

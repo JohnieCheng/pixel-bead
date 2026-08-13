@@ -5,14 +5,7 @@ import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 
 /**
  * Global application state, shared between controllers and views.
@@ -26,26 +19,7 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public final class AppState {
 
-    /**
-     * Editing tools.
-     */
-    public enum ToolType {
-        BRUSH, ERASER, EYEDROPPER
-    }
-
-    /**
-     * Color themes; the UI root carries the matching CSS class.
-     */
-    public enum Theme {
-        DARK, LIGHT
-    }
-
     private static final AppState INSTANCE = new AppState();
-
-    public static AppState get() {
-        return INSTANCE;
-    }
-
     private final ObjectProperty<BeadPalette> palette = new SimpleObjectProperty<>();
     private final ObjectProperty<BeadBoard> board = new SimpleObjectProperty<>(BeadBoard.MINI_STANDARD);
     private final ObjectProperty<Integer> boardColumns = new SimpleObjectProperty<>(1);
@@ -53,7 +27,6 @@ public final class AppState {
     private final ObjectProperty<ImageDownsampler.Interpolation> interpolation =
             new SimpleObjectProperty<>(ImageDownsampler.Interpolation.BILINEAR);
     private final ObjectProperty<PatternProject> currentProject = new SimpleObjectProperty<>();
-
     /**
      * Currently selected palette index (the brush color).
      */
@@ -75,7 +48,13 @@ public final class AppState {
      */
     private final IntegerProperty replaceFromIndex = new SimpleIntegerProperty(-1);
     /**
-     * Error diffusion algorithm used for the conversion.
+     * How a board cell picks its colour: nearest sample or region average.
+     * Region average is the default: it smooths noise and keeps patterns clean.
+     */
+    private final ObjectProperty<BeadEngine.Quantization> quantization =
+            new SimpleObjectProperty<>(BeadEngine.Quantization.AVERAGE);
+    /**
+     * Error diffusion algorithm used when quantizing.
      */
     private final ObjectProperty<BeadEngine.Dithering> dithering =
             new SimpleObjectProperty<>(BeadEngine.Dithering.NONE);
@@ -105,6 +84,10 @@ public final class AppState {
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
 
     private AppState() {
+    }
+
+    public static AppState get() {
+        return INSTANCE;
     }
 
     public ObjectProperty<BeadPalette> paletteProperty() {
@@ -153,6 +136,10 @@ public final class AppState {
 
     public ObjectProperty<BeadEngine.Dithering> ditheringProperty() {
         return dithering;
+    }
+
+    public ObjectProperty<BeadEngine.Quantization> quantizationProperty() {
+        return quantization;
     }
 
     public DoubleProperty ditheringStrengthProperty() {
@@ -211,5 +198,19 @@ public final class AppState {
     public void resetEditState() {
         editHistory.clear();
         editCount.set(0);
+    }
+
+    /**
+     * Editing tools.
+     */
+    public enum ToolType {
+        BRUSH, ERASER, EYEDROPPER
+    }
+
+    /**
+     * Color themes; the UI root carries the matching CSS class.
+     */
+    public enum Theme {
+        DARK, LIGHT
     }
 }

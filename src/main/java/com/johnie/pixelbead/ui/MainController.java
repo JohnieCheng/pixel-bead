@@ -165,6 +165,11 @@ public class MainController {
     }
 
     @FXML
+    private void onAutoSettings() {
+        conversion.applyRecommendedSettings();
+    }
+
+    @FXML
     private void onExport() {
         export.export();
     }
