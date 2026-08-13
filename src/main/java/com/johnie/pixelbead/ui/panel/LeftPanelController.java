@@ -5,11 +5,10 @@ import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
 import com.johnie.pixelbead.ui.state.AppState;
+import com.johnie.pixelbead.util.I18n;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-
-import java.util.List;
 
 /**
  * Left panel: tools, undo/redo, board presets, custom board inputs,
@@ -224,6 +223,7 @@ public class LeftPanelController {
     }
 
     private void setupInterpolationControl() {
+        interpolationCombo.setConverter(I18n.enumConverter());
         interpolationCombo.getItems().addAll(ImageDownsampler.Interpolation.values());
         interpolationCombo.valueProperty().bindBidirectional(state.interpolationProperty());
     }
@@ -232,6 +232,7 @@ public class LeftPanelController {
      * Pixel mode (nearest sample vs region average); average disables dithering.
      */
     private void setupQuantizationControl() {
+        quantizationCombo.setConverter(I18n.enumConverter());
         quantizationCombo.getItems().addAll(BeadEngine.Quantization.values());
         quantizationCombo.valueProperty().bindBidirectional(state.quantizationProperty());
         quantizationCombo.valueProperty().addListener((obs, old, quantization) ->
@@ -252,6 +253,7 @@ public class LeftPanelController {
      * Dithering algorithm, intensity slider and orphan cleaning (all live in AppState).
      */
     private void setupDitheringControls() {
+        ditheringCombo.setConverter(I18n.enumConverter());
         ditheringCombo.getItems().addAll(BeadEngine.Dithering.values());
         ditheringCombo.valueProperty().bindBidirectional(state.ditheringProperty());
         ditheringCombo.valueProperty().addListener((obs, old, dithering) ->
@@ -269,36 +271,8 @@ public class LeftPanelController {
         setupMergeControls();
     }
 
-    /**
-     * Orphan cleaning strength: Off / Light / Medium / Strong.
-     */
-    private enum OrphanLevel {
-        OFF(0, "Off"), LIGHT(1, "Light"), MEDIUM(2, "Medium"), STRONG(3, "Strong");
-
-        private final int tolerance;
-        private final String label;
-
-        OrphanLevel(int tolerance, String label) {
-            this.tolerance = tolerance;
-            this.label = label;
-        }
-
-        static OrphanLevel fromTolerance(int tolerance) {
-            for (OrphanLevel level : values()) {
-                if (level.tolerance == tolerance) {
-                    return level;
-                }
-            }
-            return OFF;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-    }
-
     private void setupOrphanControls() {
+        orphanCombo.setConverter(I18n.enumConverter());
         orphanCombo.getItems().addAll(OrphanLevel.values());
         orphanCombo.valueProperty().addListener((obs, old, level) -> {
             if (level != null) {
@@ -308,40 +282,8 @@ public class LeftPanelController {
         orphanCombo.setValue(OrphanLevel.fromTolerance(state.orphanToleranceProperty().get()));
     }
 
-    /**
-     * Colour merge presets and the low-frequency share threshold.
-     */
-    private enum MergePreset {
-        OFF(0.0, "Off"),
-        CONSERVATIVE(2.0, "Conservative (ΔE 2)"),
-        STANDARD(4.0, "Standard (ΔE 4)"),
-        AGGRESSIVE(7.0, "Aggressive (ΔE 7)"),
-        EXTREME(12.0, "Extreme (ΔE 12)");
-
-        private final double threshold;
-        private final String label;
-
-        MergePreset(double threshold, String label) {
-            this.threshold = threshold;
-            this.label = label;
-        }
-
-        static MergePreset fromThreshold(double threshold) {
-            for (MergePreset preset : values()) {
-                if (preset.threshold == threshold) {
-                    return preset;
-                }
-            }
-            return OFF;
-        }
-
-        @Override
-        public String toString() {
-            return label;
-        }
-    }
-
     private void setupMergeControls() {
+        mergeCombo.setConverter(I18n.enumConverter());
         mergeCombo.getItems().addAll(MergePreset.values());
         // ComboBox item is the enum; sync its value to the primitive property.
         mergeCombo.valueProperty().addListener((obs, old, preset) -> {
@@ -416,5 +358,77 @@ public class LeftPanelController {
     private void refreshHistoryButtons() {
         undoButton.setDisable(!state.editHistory().canUndo());
         redoButton.setDisable(!state.editHistory().canRedo());
+    }
+
+    /**
+     * Orphan cleaning strength: Off / Light / Medium / Strong.
+     */
+    private enum OrphanLevel implements I18n.Key {
+        OFF(0), LIGHT(1), MEDIUM(2), STRONG(3);
+
+        /**
+         * Full key prefix: enum.orphanlevel.
+         */
+        private static final String KEY_PREFIX = "enum.orphanlevel.";
+        private final int tolerance;
+
+        OrphanLevel(int tolerance) {
+            this.tolerance = tolerance;
+        }
+
+        static OrphanLevel fromTolerance(int tolerance) {
+            for (OrphanLevel level : values()) {
+                if (level.tolerance == tolerance) {
+                    return level;
+                }
+            }
+            return OFF;
+        }
+
+        /**
+         * i18n key, e.g. {@code enum.orphanlevel.medium}.
+         */
+        @Override
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
+        }
+    }
+
+    /**
+     * Colour merge presets and the low-frequency share threshold.
+     */
+    private enum MergePreset implements I18n.Key {
+        OFF(0.0),
+        CONSERVATIVE(2.0),
+        STANDARD(4.0),
+        AGGRESSIVE(7.0),
+        EXTREME(12.0);
+
+        /**
+         * Full key prefix: enum.mergepreset.
+         */
+        private static final String KEY_PREFIX = "enum.mergepreset.";
+        private final double threshold;
+
+        MergePreset(double threshold) {
+            this.threshold = threshold;
+        }
+
+        static MergePreset fromThreshold(double threshold) {
+            for (MergePreset preset : values()) {
+                if (preset.threshold == threshold) {
+                    return preset;
+                }
+            }
+            return OFF;
+        }
+
+        /**
+         * i18n key, e.g. {@code enum.mergepreset.aggressive}.
+         */
+        @Override
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
+        }
     }
 }

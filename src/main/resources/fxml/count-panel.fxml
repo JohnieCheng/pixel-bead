@@ -4,12 +4,12 @@
 <?import javafx.scene.layout.VBox?>
 <VBox spacing="8" VBox.vgrow="ALWAYS" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.johnie.pixelbead.ui.panel.CountPanelController">
-    <Label styleClass="panel-title" text="Bead Count"/>
+    <Label styleClass="panel-title" text="%count.title"/>
     <TableView fx:id="countTable" VBox.vgrow="ALWAYS" prefHeight="240">
         <columns>
-            <TableColumn fx:id="codeColumn" text="Code" prefWidth="80"/>
-            <TableColumn fx:id="swatchColumn" text="Color" prefWidth="60"/>
-            <TableColumn fx:id="countColumn" text="Beads" prefWidth="70"/>
+            <TableColumn fx:id="codeColumn" text="%count.code" prefWidth="80"/>
+            <TableColumn fx:id="swatchColumn" text="%count.color" prefWidth="60"/>
+            <TableColumn fx:id="countColumn" text="%count.beads" prefWidth="70"/>
         </columns>
     </TableView>
 </VBox>

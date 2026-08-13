@@ -10,6 +10,7 @@ import com.johnie.pixelbead.engine.recommend.ConversionRecommender.RecommendedSe
 import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.dialogs.CropDialog;
 import com.johnie.pixelbead.ui.state.AppState;
+import com.johnie.pixelbead.util.I18n;
 import com.johnie.pixelbead.util.TaskUtil;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
@@ -103,7 +104,7 @@ public final class ConversionCoordinator {
             sourceImage = cropped.get();
             regenerate();
         } catch (IOException e) {
-            Toasts.showError("Failed to load image", file.getName() + System.lineSeparator() + e.getMessage());
+            Toasts.showError(I18n.get("toast.loadFailed"), file.getName() + System.lineSeparator() + e.getMessage());
         }
     }
 
@@ -122,16 +123,15 @@ public final class ConversionCoordinator {
         state.ditheringStrengthProperty().set(rec.ditheringStrength());
         state.orphanToleranceProperty().set(rec.orphanTolerance());
         state.mergeThresholdProperty().set(rec.mergeThreshold());
-        Toasts.show(importButton, "Auto: " + describe(rec));
+        Toasts.show(importButton, I18n.format("toast.autoDetected", describe(rec), rec.mergeThreshold()));
     }
 
     private static String describe(RecommendedSettings rec) {
-        String dither = switch (rec.dithering()) {
-            case NONE -> "flat colours";
-            case FLOYD_STEINBERG -> "photo dithering";
-            case ATKINSON -> "soft dithering";
+        return switch (rec.dithering()) {
+            case NONE -> I18n.get("toast.ditherNone");
+            case FLOYD_STEINBERG -> I18n.get("toast.ditherFloyd");
+            case ATKINSON -> I18n.get("toast.ditherAtkinson");
         };
-        return "detected " + dither + ", merge " + rec.mergeThreshold();
     }
 
     /**

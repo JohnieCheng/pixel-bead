@@ -1,5 +1,7 @@
 package com.johnie.pixelbead.engine.quantizer;
 
+import com.johnie.pixelbead.util.I18n;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -49,25 +51,23 @@ public final class ImageDownsampler {
     /**
      * Resampling mode.
      */
-    public enum Interpolation {
+    public enum Interpolation implements I18n.Key {
         /**
          * Keep hard pixel edges (pixel art sources).
          */
-        NEAREST("Nearest"),
+        NEAREST,
         /**
          * Smooth interpolation (photographic sources).
          */
-        BILINEAR("Bilinear");
+        BILINEAR;
 
-        private final String label;
+        /** Full key prefix: enum.interpolation. */
+        private static final String KEY_PREFIX = "enum.interpolation.";
 
-        Interpolation(String label) {
-            this.label = label;
-        }
-
+        /** i18n key, e.g. {@code enum.interpolation.bilinear}. */
         @Override
-        public String toString() {
-            return label;
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
         }
     }
 }

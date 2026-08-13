@@ -3,71 +3,71 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.control.ScrollPane?>
 <ScrollPane fitToWidth="true" styleClass="side-scroll" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.johnie.pixelbead.ui.panel.LeftPanelController">
+            fx:controller="com.johnie.pixelbead.ui.panel.LeftPanelController">
     <VBox styleClass="side-panel" spacing="8" prefWidth="230" maxWidth="Infinity">
         <padding>
             <Insets top="12" right="12" bottom="12" left="12"/>
         </padding>
-    <Label styleClass="panel-title" text="Tools"/>
-    <HBox spacing="6">
-        <ToggleButton fx:id="brushTool" text="Brush" maxWidth="Infinity" HBox.hgrow="ALWAYS" selected="true"/>
-        <ToggleButton fx:id="eraserTool" text="Eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-        <ToggleButton fx:id="pickerTool" text="Pick" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-    </HBox>
-    <HBox spacing="6">
-        <Button fx:id="undoButton" text="Undo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onUndo"
-                disable="true"/>
-        <Button fx:id="redoButton" text="Redo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onRedo"
-                disable="true"/>
-    </HBox>
-    <Separator/>
-    <Label styleClass="panel-title" text="Board"/>
-    <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>
-    <VBox fx:id="customBoardPane" spacing="6" visible="false" managed="false">
-        <Label text="Columns"/>
-        <Spinner fx:id="columnsSpinner" editable="true" maxWidth="Infinity"/>
-        <Label text="Rows"/>
-        <Spinner fx:id="rowsSpinner" editable="true" maxWidth="Infinity"/>
-        <Label text="Bead size (mm)"/>
-        <Spinner fx:id="beadSizeSpinner" editable="true" maxWidth="Infinity"/>
-        <Label text="Sub-grid interval"/>
-        <Spinner fx:id="subGridSpinner" editable="true" maxWidth="Infinity"/>
-    </VBox>
-    <Label text="Boards (W x H)"/>
-    <HBox spacing="6">
-        <ComboBox fx:id="boardColsCombo" prefWidth="72"/>
-        <Label text="x"/>
-        <ComboBox fx:id="boardRowsCombo" prefWidth="72"/>
-    </HBox>
-    <Label text="Interpolation"/>
-    <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
-    <Label text="Pixel mode"/>
-    <ComboBox fx:id="quantizationCombo" maxWidth="Infinity"/>
-    <Label text="Dithering"/>
-    <ComboBox fx:id="ditheringCombo" maxWidth="Infinity"/>
-    <TitledPane text="Advanced" expanded="false" maxWidth="Infinity">
-        <VBox spacing="8">
-            <VBox fx:id="intensityGroup" spacing="6">
-                <Label text="Intensity"/>
-                <HBox spacing="6">
-                    <Slider fx:id="intensitySlider" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-                    <Label fx:id="intensityValue" text="0%"/>
-                </HBox>
-            </VBox>
-            <Label text="Orphan clean"/>
-            <ComboBox fx:id="orphanCombo" maxWidth="Infinity"/>
-            <Label text="Color Merge"/>
-            <ComboBox fx:id="mergeCombo" maxWidth="Infinity"/>
-            <VBox fx:id="minShareGroup" spacing="6">
-                <Label text="Min share (%)"/>
-                <Spinner fx:id="minBeadsSpinner" editable="true" maxWidth="Infinity"/>
-            </VBox>
+        <Label styleClass="panel-title" text="%label.tools"/>
+        <HBox spacing="6">
+            <ToggleButton fx:id="brushTool" text="%button.brush" maxWidth="Infinity" HBox.hgrow="ALWAYS"
+                          selected="true"/>
+            <ToggleButton fx:id="eraserTool" text="%button.eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            <ToggleButton fx:id="pickerTool" text="%button.pick" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        </HBox>
+        <HBox spacing="6">
+            <Button fx:id="undoButton" text="%button.undo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onUndo"
+                    disable="true"/>
+            <Button fx:id="redoButton" text="%button.redo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onRedo"
+                    disable="true"/>
+        </HBox>
+        <Separator/>
+        <Label styleClass="panel-title" text="%label.board"/>
+        <ComboBox fx:id="boardCombo" maxWidth="Infinity"/>
+        <VBox fx:id="customBoardPane" spacing="6" visible="false" managed="false">
+            <Label text="%label.columns"/>
+            <Spinner fx:id="columnsSpinner" editable="true" maxWidth="Infinity"/>
+            <Label text="%label.rows"/>
+            <Spinner fx:id="rowsSpinner" editable="true" maxWidth="Infinity"/>
+            <Label text="%label.beadSize"/>
+            <Spinner fx:id="beadSizeSpinner" editable="true" maxWidth="Infinity"/>
+            <Label text="%label.subGrid"/>
+            <Spinner fx:id="subGridSpinner" editable="true" maxWidth="Infinity"/>
         </VBox>
-    </TitledPane>
-    <Separator/>
-    <Label styleClass="panel-title" text="Pattern"/>
-    <Label fx:id="patternInfoLabel" wrapText="true" styleClass="pattern-info"/>
+        <Label text="%label.boards"/>
+        <HBox spacing="6">
+            <ComboBox fx:id="boardColsCombo" prefWidth="72"/>
+            <Label text="x"/>
+            <ComboBox fx:id="boardRowsCombo" prefWidth="72"/>
+        </HBox>
+        <Label text="%label.interpolation"/>
+        <ComboBox fx:id="interpolationCombo" maxWidth="Infinity"/>
+        <Label text="%label.pixelMode"/>
+        <ComboBox fx:id="quantizationCombo" maxWidth="Infinity"/>
+        <Label text="%label.dithering"/>
+        <ComboBox fx:id="ditheringCombo" maxWidth="Infinity"/>
+        <TitledPane text="%label.advanced" expanded="false" maxWidth="Infinity">
+            <VBox spacing="8">
+                <VBox fx:id="intensityGroup" spacing="6">
+                    <Label text="%label.intensity"/>
+                    <HBox spacing="6">
+                        <Slider fx:id="intensitySlider" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="intensityValue" text="0%"/>
+                    </HBox>
+                </VBox>
+                <Label text="%label.orphanClean"/>
+                <ComboBox fx:id="orphanCombo" maxWidth="Infinity"/>
+                <Label text="%label.colorMerge"/>
+                <ComboBox fx:id="mergeCombo" maxWidth="Infinity"/>
+                <VBox fx:id="minShareGroup" spacing="6">
+                    <Label text="%label.minShare"/>
+                    <Spinner fx:id="minBeadsSpinner" editable="true" maxWidth="Infinity"/>
+                </VBox>
+            </VBox>
+        </TitledPane>
+        <Separator/>
+        <Label styleClass="panel-title" text="%label.pattern"/>
+        <Label fx:id="patternInfoLabel" wrapText="true" styleClass="pattern-info"/>
     </VBox>
 </ScrollPane>

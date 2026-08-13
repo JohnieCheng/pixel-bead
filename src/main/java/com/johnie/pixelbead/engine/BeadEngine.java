@@ -5,6 +5,7 @@ import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ColorDifference;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import com.johnie.pixelbead.util.I18n;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -32,44 +33,40 @@ public final class BeadEngine {
     private static final int ALPHA_OPAQUE_THRESHOLD = 128;
 
     /** Error diffusion algorithm used when quantizing. */
-    public enum Dithering {
+    public enum Dithering implements I18n.Key {
         /** Plain nearest-colour mapping (pixel art / flat areas). */
-        NONE("None"),
+        NONE,
         /** Floyd-Steinberg: error spread to 4 neighbours (7/16, 3/16, 5/16, 1/16). */
-        FLOYD_STEINBERG("Floyd-Steinberg"),
+        FLOYD_STEINBERG,
         /** Atkinson: gentler error spread to 6 neighbours (1/8 each), less noise. */
-        ATKINSON("Atkinson");
+        ATKINSON;
 
-        private final String label;
+        /** Full key prefix: enum.dithering. */
+        private static final String KEY_PREFIX = "enum.dithering.";
 
-        Dithering(String label) {
-            this.label = label;
-        }
-
+        /** i18n key, e.g. {@code enum.dithering.floyd_steinberg}. */
         @Override
-        public String toString() {
-            return label;
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
         }
     }
 
     /**
      * How a board cell picks its colour from the source.
      */
-    public enum Quantization {
+    public enum Quantization implements I18n.Key {
         /** Sample the interpolated source pixel (current behaviour). */
-        NEAREST("Nearest"),
+        NEAREST,
         /** Average the whole source region covered by the cell (anti-noise). */
-        AVERAGE("Average");
+        AVERAGE;
 
-        private final String label;
+        /** Full key prefix: enum.quantization. */
+        private static final String KEY_PREFIX = "enum.quantization.";
 
-        Quantization(String label) {
-            this.label = label;
-        }
-
+        /** i18n key, e.g. {@code enum.quantization.average}. */
         @Override
-        public String toString() {
-            return label;
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
         }
     }
 

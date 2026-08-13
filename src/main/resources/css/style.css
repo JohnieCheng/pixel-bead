@@ -406,6 +406,20 @@
     -fx-font-size: 12px;
 }
 
+.status-button {
+    -fx-font-size: 12px;
+    -fx-background-color: transparent;
+    -fx-padding: 2 6 2 6;
+    -fx-text-fill: -pixel-text-dim;
+    -fx-border-color: transparent;
+    -fx-background-radius: 4;
+}
+
+.status-button:hover {
+    -fx-background-color: -pixel-hover;
+    -fx-text-fill: -pixel-text;
+}
+
 .palette-scroll {
     -fx-background-color: transparent;
 }

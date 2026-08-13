@@ -19,6 +19,22 @@ import javafx.beans.property.*;
  */
 public final class AppState {
 
+    /** UI language; native names are shown untranslated. */
+    public enum Language {
+        ZH("中文"), EN("English");
+
+        private final String nativeName;
+
+        Language(String nativeName) {
+            this.nativeName = nativeName;
+        }
+
+        @Override
+        public String toString() {
+            return nativeName;
+        }
+    }
+
     private static final AppState INSTANCE = new AppState();
     private final ObjectProperty<BeadPalette> palette = new SimpleObjectProperty<>();
     private final ObjectProperty<BeadBoard> board = new SimpleObjectProperty<>(BeadBoard.MINI_STANDARD);
@@ -82,12 +98,20 @@ public final class AppState {
      * Active color theme; light is the default.
      */
     private final ObjectProperty<Theme> theme = new SimpleObjectProperty<>(Theme.LIGHT);
+    /**
+     * UI language, resolved at startup from the persisted settings.
+     */
+    private final ObjectProperty<Language> language = new SimpleObjectProperty<>(Language.EN);
 
     private AppState() {
     }
 
     public static AppState get() {
         return INSTANCE;
+    }
+
+    public ObjectProperty<Language> languageProperty() {
+        return language;
     }
 
     public ObjectProperty<BeadPalette> paletteProperty() {

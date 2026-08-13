@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.VBox?>
 <VBox spacing="8" VBox.vgrow="ALWAYS" xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.johnie.pixelbead.ui.panel.PalettePanelController">
-    <Label styleClass="panel-title" text="Palette"/>
+    <Label styleClass="panel-title" text="%label.palette"/>
     <ComboBox fx:id="paletteCombo" maxWidth="Infinity"/>
     <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" styleClass="palette-scroll">
         <FlowPane fx:id="palettePane" hgap="4" vgap="4"/>

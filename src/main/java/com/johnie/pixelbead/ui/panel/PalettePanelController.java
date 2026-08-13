@@ -4,6 +4,7 @@ import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.ui.coordinator.ReplaceService;
 import com.johnie.pixelbead.ui.state.AppState;
+import com.johnie.pixelbead.util.I18n;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
@@ -28,21 +29,23 @@ public class PalettePanelController {
     private static final int SWATCH_SIZE = 20;
 
     /** Bundled palette files offered by the combo. */
-    private enum PaletteChoice {
-        STANDARD_221("Mard Standard (221)", "/palettes/mard_standard_221.json"),
-        FULL_291("Mard Full (291)", "/palettes/mard_standard.json");
+    private enum PaletteChoice implements I18n.Key {
+        STANDARD_221("/palettes/mard_standard_221.json"),
+        FULL_291("/palettes/mard_standard.json");
 
-        private final String label;
         private final String resource;
 
-        PaletteChoice(String label, String resource) {
-            this.label = label;
+        PaletteChoice(String resource) {
             this.resource = resource;
         }
 
+        /** Full key prefix: enum.palettechoice. */
+        private static final String KEY_PREFIX = "enum.palettechoice.";
+
+        /** i18n key, e.g. {@code enum.palettechoice.full_291}. */
         @Override
-        public String toString() {
-            return label;
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
         }
     }
 
@@ -60,6 +63,7 @@ public class PalettePanelController {
 
     @FXML
     private void initialize() {
+        paletteCombo.setConverter(I18n.enumConverter());
         paletteCombo.getItems().addAll(PaletteChoice.values());
         paletteCombo.setValue(PaletteChoice.STANDARD_221);
         paletteCombo.valueProperty().addListener((obs, old, choice) -> {

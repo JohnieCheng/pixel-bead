@@ -6,7 +6,12 @@ import com.johnie.pixelbead.ui.panel.CountPanelController;
 import com.johnie.pixelbead.ui.panel.LeftPanelController;
 import com.johnie.pixelbead.ui.panel.PalettePanelController;
 import com.johnie.pixelbead.ui.state.AppState;
+import com.johnie.pixelbead.util.I18n;
 import javafx.application.Application;
+import javafx.application.Platform;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -25,9 +30,73 @@ import java.io.IOException;
  * @since 2026/08/10
  */
 public class MainApplication extends Application {
+    /** Persisted language wins; otherwise the system locale decides. */
+    private static AppState.Language resolveLanguage(String persisted) {
+        if (persisted != null) {
+            try {
+                return AppState.Language.valueOf(persisted.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                // fall through to the locale check
+            }
+        }
+        return Locale.getDefault().getLanguage().startsWith("zh")
+                ? AppState.Language.ZH
+                : AppState.Language.EN;
+    }
+
+    private static Stage primaryStage;
+
     @Override
-    public void start(Stage stage) throws IOException {
+    public void start(Stage stage) throws Exception {
+        primaryStage = stage;
         setDockIcon();
+        // Resolve the UI language from the system locale before any FXML is
+        // built, so the UI texts and enum combos resolve against the right
+        // bundle. The in-app toggle changes it for the current session only.
+        applyLanguage(resolveLanguage(null));
+        Parent root = buildRoot();
+        Scene scene = new Scene(root, 1280, 800);
+        scene.getStylesheets().add(MainApplication.class.getResource("/css/style.css").toExternalForm());
+        stage.setScene(scene);
+        stage.setTitle("Pixel Bead");
+        stage.show();
+    }
+
+    /** Applies the language to the shared bundle and state. */
+    public static void applyLanguage(AppState.Language language) {
+        AppState.get().languageProperty().set(language);
+        I18n.setBundle(ResourceBundle.getBundle("i18n.messages",
+                language == AppState.Language.ZH ? Locale.CHINESE : Locale.ENGLISH));
+    }
+
+    /**
+     * Rebuilds the scene root with the current bundle. Swapping the root on
+     * the existing scene keeps the window geometry untouched, so the layout
+     * (status bar included) cannot jump or fall off-screen.
+     */
+    public static void reloadScene() {
+        Platform.runLater(() -> {
+            if (primaryStage == null) {
+                return;
+            }
+            try {
+                Parent root = buildRoot();
+                Scene scene = primaryStage.getScene();
+                if (scene != null) {
+                    scene.setRoot(root);
+                } else {
+                    Scene newScene = new Scene(root);
+                    newScene.getStylesheets().add(
+                            MainApplication.class.getResource("/css/style.css").toExternalForm());
+                    primaryStage.setScene(newScene);
+                }
+            } catch (IOException e) {
+                // Keep the old scene alive rather than crashing the app.
+            }
+        });
+    }
+
+    private static Parent buildRoot() throws IOException {
         // Load the palette before any FXML controller initializes: included
         // panel controllers run before MainController.initialize.
         try {
@@ -36,6 +105,7 @@ public class MainApplication extends Application {
             throw new IllegalStateException("Failed to load palette", e);
         }
         FXMLLoader loader = new FXMLLoader(MainApplication.class.getResource("/fxml/main.fxml"));
+        loader.setResources(I18n.bundle());
         // Shared controller instances: included panel controllers are created
         // here so MainController can attach shared services to them.
         MainController main = new MainController();
@@ -59,11 +129,7 @@ public class MainApplication extends Application {
             return null;
         });
         Parent root = loader.load();
-        Scene scene = new Scene(root, 1280, 800);
-        scene.getStylesheets().add(MainApplication.class.getResource("/css/style.css").toExternalForm());
-        stage.setTitle("Pixel Bead");
-        stage.setScene(scene);
-        stage.show();
+        return root;
     }
 
     /**

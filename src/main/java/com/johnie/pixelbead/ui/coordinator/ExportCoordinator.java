@@ -5,6 +5,7 @@ import com.johnie.pixelbead.engine.renderer.PatternExporter;
 import com.johnie.pixelbead.ui.components.InteractiveCanvas;
 import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.state.AppState;
+import com.johnie.pixelbead.util.I18n;
 import com.johnie.pixelbead.util.TaskUtil;
 import javafx.concurrent.Task;
 import javafx.scene.control.Button;
@@ -40,6 +41,7 @@ public final class ExportCoordinator {
     }
 
     public void setup() {
+        formatCombo.setConverter(I18n.enumConverter());
         formatCombo.getItems().addAll(ExportFormat.values());
         formatCombo.setValue(ExportFormat.PNG);
         exportButton.disableProperty().bind(state.currentProjectProperty().isNull());
@@ -77,11 +79,11 @@ public final class ExportCoordinator {
         task.setOnRunning(e -> showOverlay());
         task.setOnSucceeded(e -> {
             hideOverlay();
-            Toasts.show(canvas, "Saved to " + file.getName());
+            Toasts.show(canvas, I18n.format("toast.savedTo", file.getName()));
         });
         task.setOnFailed(e -> {
             hideOverlay();
-            Toasts.showError("Export failed", String.valueOf(task.getException()));
+            Toasts.showError(I18n.get("error.exportFailed"), String.valueOf(task.getException()));
         });
         exportTask = task;
         Thread thread = new Thread(task, "bead-export");
@@ -114,18 +116,16 @@ public final class ExportCoordinator {
     /**
      * Supported export formats.
      */
-    public enum ExportFormat {
-        PNG("PNG"), PDF("PDF"), TEXT("Text");
+    public enum ExportFormat implements I18n.Key {
+        PNG, PDF, TEXT;
 
-        private final String label;
+        /** Full key prefix: enum.exportformat. */
+        private static final String KEY_PREFIX = "enum.exportformat.";
 
-        ExportFormat(String label) {
-            this.label = label;
-        }
-
+        /** i18n key, e.g. {@code enum.exportformat.text}. */
         @Override
-        public String toString() {
-            return label;
+        public String getI18nKey() {
+            return KEY_PREFIX + name().toLowerCase();
         }
     }
 }

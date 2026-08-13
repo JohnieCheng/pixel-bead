@@ -1,12 +1,15 @@
 package com.johnie.pixelbead.ui;
 
+import com.johnie.pixelbead.MainApplication;
 import com.johnie.pixelbead.ui.components.InteractiveCanvas;
+import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.coordinator.ConversionCoordinator;
 import com.johnie.pixelbead.ui.coordinator.ExportCoordinator;
 import com.johnie.pixelbead.ui.coordinator.ReplaceService;
 import com.johnie.pixelbead.ui.panel.CountPanelController;
 import com.johnie.pixelbead.ui.panel.PalettePanelController;
 import com.johnie.pixelbead.ui.state.AppState;
+import com.johnie.pixelbead.util.I18n;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -55,6 +58,9 @@ public class MainController {
     @FXML
     private StackPane loadingOverlay;
 
+    @FXML
+    private Button languageButton;
+
     private ConversionCoordinator conversion;
     private ExportCoordinator export;
     private ReplaceService replace;
@@ -72,6 +78,7 @@ public class MainController {
 
     @FXML
     private void initialize() {
+        languageButton.setText(state.languageProperty().get().toString());
         conversion = new ConversionCoordinator(loadingOverlay, importButton);
         export = new ExportCoordinator(canvas, loadingOverlay, exportButton, formatCombo);
         replace = new ReplaceService(canvas);
@@ -124,7 +131,7 @@ public class MainController {
      */
     private void setupStatusHint() {
         state.replaceFromIndexProperty().addListener((obs, old, idx) -> statusLabel.setText(
-                idx.intValue() >= 0 ? "Pick a target colour in the palette (Esc to cancel)" : ""));
+                idx.intValue() >= 0 ? I18n.get("status.replaceHint") : ""));
     }
 
     @FXML
@@ -167,6 +174,19 @@ public class MainController {
     @FXML
     private void onAutoSettings() {
         conversion.applyRecommendedSettings();
+    }
+
+    /**
+     * One-click language toggle: swaps the bundle and rebuilds the scene so
+     * every text refreshes immediately. Session-only, not persisted.
+     */
+    @FXML
+    private void onToggleLanguage() {
+        AppState.Language next = state.languageProperty().get() == AppState.Language.ZH
+                ? AppState.Language.EN
+                : AppState.Language.ZH;
+        MainApplication.applyLanguage(next);
+        MainApplication.reloadScene();
     }
 
     @FXML
