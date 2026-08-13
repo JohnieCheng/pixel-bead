@@ -6,14 +6,19 @@ import com.johnie.pixelbead.ui.coordinator.ReplaceService;
 import com.johnie.pixelbead.ui.state.AppState;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.util.StringConverter;
+
+import java.io.IOException;
 
 /**
  * Palette swatches: click selects the brush colour; while a replacement is
  * pending (AppState.replaceFromIndex) hovering previews and clicking executes.
+ * The combo on top switches between bundled palette files.
  *
  * @author johnie
  * @version 2.0.0
@@ -23,9 +28,25 @@ public class PalettePanelController {
 
     private static final int SWATCH_SIZE = 20;
 
+    /** Bundled palette files offered by the combo. */
+    private enum PaletteChoice {
+        STANDARD_221("Mard Standard (221)", "/palettes/mard_standard_221.json"),
+        FULL_291("Mard Full (291)", "/palettes/mard_standard.json");
+
+        private final String label;
+        private final String resource;
+
+        PaletteChoice(String label, String resource) {
+            this.label = label;
+            this.resource = resource;
+        }
+    }
+
     private final AppState state = AppState.get();
     private ReplaceService replace;
 
+    @FXML
+    private ComboBox<PaletteChoice> paletteCombo;
     @FXML
     private FlowPane palettePane;
 
@@ -35,8 +56,47 @@ public class PalettePanelController {
 
     @FXML
     private void initialize() {
+        paletteCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(PaletteChoice choice) {
+                return choice.label;
+            }
+
+            @Override
+            public PaletteChoice fromString(String s) {
+                return null;
+            }
+        });
+        paletteCombo.getItems().addAll(PaletteChoice.values());
+        paletteCombo.setValue(PaletteChoice.FULL_291);
+        paletteCombo.valueProperty().addListener((obs, old, choice) -> {
+            if (choice == null) {
+                return;
+            }
+            try {
+                state.paletteProperty().set(BeadPalette.loadResource(choice.resource));
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to load palette " + choice.resource, e);
+            }
+        });
+
+        state.paletteProperty().addListener((obs, oldPalette, newPalette) -> {
+            if (newPalette != null) {
+                rebuildSwatches();
+            }
+        });
+        rebuildSwatches();
+    }
+
+    /**
+     * Rebuilds the swatch grid for the current palette.
+     */
+    private void rebuildSwatches() {
         BeadPalette palette = state.paletteProperty().get();
         palettePane.getChildren().clear();
+        if (palette == null) {
+            return;
+        }
         for (int i = 0; i < palette.size(); i++) {
             BeadColor color = palette.colorAt(i);
             Rectangle swatch = new Rectangle(SWATCH_SIZE, SWATCH_SIZE);
@@ -64,6 +124,8 @@ public class PalettePanelController {
             });
             palettePane.getChildren().add(swatch);
         }
+        // The new palette may not contain the previously selected colour.
+        state.selectedColorIndexProperty().set(0);
         state.selectedColorIndexProperty().addListener((obs, old, idx) -> refreshSwatchHighlight());
         refreshSwatchHighlight();
     }

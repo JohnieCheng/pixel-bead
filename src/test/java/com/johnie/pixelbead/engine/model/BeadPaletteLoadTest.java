@@ -33,6 +33,19 @@ class BeadPaletteLoadTest {
     }
 
     @Test
+    void loadsStandard221Palette() throws IOException {
+        BeadPalette p221 = BeadPalette.loadResource("/palettes/mard_standard_221.json");
+        assertEquals(221, p221.size());
+        BeadColor a1 = p221.colorAt(0);
+        assertEquals(249, a1.r());
+        assertEquals(240, a1.g());
+        assertEquals(205, a1.b());
+        assertEquals("#F9F0CD", a1.hex());
+        BeadColor m15 = p221.colorAt(220);
+        assertEquals("M15", m15.code());
+    }
+
+    @Test
     void allColorsHaveValidCachedLab() throws IOException {
         BeadPalette palette = BeadPalette.loadResource("/palettes/mard_standard.json");
         for (BeadColor color : palette.colors()) {

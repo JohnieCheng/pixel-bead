@@ -58,6 +58,7 @@ public final class ConversionCoordinator {
         state.boardColumnsProperty().addListener(obs -> regenerate());
         state.boardRowsProperty().addListener(obs -> regenerate());
         state.interpolationProperty().addListener(obs -> regenerate());
+        state.paletteProperty().addListener(obs -> regenerate());
         state.ditheringProperty().addListener(obs -> regenerate());
         state.ditheringStrengthProperty().addListener(obs -> regenerate());
         state.orphanCleanProperty().addListener(obs -> regenerate());
