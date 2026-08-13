@@ -45,12 +45,15 @@ public final class BeadEngine {
     public record ConversionOptions(ImageDownsampler.Interpolation interpolation,
                                     Dithering dithering,
                                     double ditheringStrength,
-                                    boolean orphanClean,
+                                    int orphanTolerance,
                                     double mergeThreshold,
                                     int mergeMinShare) {
         public ConversionOptions {
             if (ditheringStrength < 0 || ditheringStrength > 1) {
                 throw new IllegalArgumentException("dithering strength must be in [0,1]");
+            }
+            if (orphanTolerance < 0 || orphanTolerance > 3) {
+                throw new IllegalArgumentException("orphan tolerance must be in [0,3]");
             }
             if (mergeThreshold < 0) {
                 throw new IllegalArgumentException("merge threshold must be >= 0");
@@ -61,7 +64,7 @@ public final class BeadEngine {
         }
 
         public static ConversionOptions plain(ImageDownsampler.Interpolation interpolation) {
-            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, false, 0.0, 1);
+            return new ConversionOptions(interpolation, Dithering.NONE, 1.0, 0, 0.0, 1);
         }
     }
 
@@ -111,8 +114,8 @@ public final class BeadEngine {
         if (options.mergeThreshold() > 0) {
             grid = mergeSimilarColors(grid, palette, options.mergeThreshold(), options.mergeMinShare());
         }
-        if (options.orphanClean()) {
-            grid = cleanOrphans(grid);
+        if (options.orphanTolerance() > 0) {
+            grid = cleanOrphans(grid, options.orphanTolerance() - 1);
         }
         return new PatternProject(board, palette, grid);
     }
@@ -302,10 +305,12 @@ public final class BeadEngine {
     }
 
     /**
-     * Replaces every cell whose 8 neighbours are all different colours with the
-     * most frequent neighbouring colour, removing isolated single beads.
+     * Replaces every cell surrounded by few matching neighbours with the most
+     * frequent neighbouring colour, removing isolated single beads. Higher
+     * tolerance treats cells with up to that many matching neighbours as
+     * orphaned as well, cleaning small clusters more aggressively.
      */
-    private static int[][] cleanOrphans(int[][] grid) {
+    private static int[][] cleanOrphans(int[][] grid, int tolerance) {
         int gridH = grid.length;
         int gridW = grid[0].length;
         int[][] cleaned = new int[gridH][];
@@ -320,7 +325,7 @@ public final class BeadEngine {
                 }
                 int[] neighbours = new int[8];
                 int count = 0;
-                boolean orphan = true;
+                int same = 0;
                 for (int dy = -1; dy <= 1; dy++) {
                     for (int dx = -1; dx <= 1; dx++) {
                         if (dx == 0 && dy == 0) {
@@ -337,11 +342,11 @@ public final class BeadEngine {
                         }
                         neighbours[count++] = nv;
                         if (nv == value) {
-                            orphan = false;
+                            same++;
                         }
                     }
                 }
-                if (orphan && count > 0) {
+                if (count > 0 && same <= tolerance) {
                     cleaned[y][x] = modeOf(neighbours, count);
                 }
             }

@@ -54,11 +54,14 @@
                     <Label fx:id="intensityValue" text="0%"/>
                 </HBox>
             </VBox>
-            <CheckBox fx:id="orphanCheck" text="Orphan pixel cleaning"/>
+            <Label text="Orphan clean"/>
+            <ComboBox fx:id="orphanCombo" maxWidth="Infinity"/>
             <Label text="Color Merge"/>
             <ComboBox fx:id="mergeCombo" maxWidth="Infinity"/>
-            <Label text="Min share (%)"/>
-            <Spinner fx:id="minBeadsSpinner" editable="true" maxWidth="Infinity"/>
+            <VBox fx:id="minShareGroup" spacing="6">
+                <Label text="Min share (%)"/>
+                <Spinner fx:id="minBeadsSpinner" editable="true" maxWidth="Infinity"/>
+            </VBox>
         </VBox>
     </TitledPane>
     <Separator/>

@@ -85,9 +85,10 @@ public final class AppState {
      */
     private final DoubleProperty ditheringStrength = new SimpleDoubleProperty(0.0);
     /**
-     * Merges isolated single beads into their surrounding colour.
+     * Orphan cleaning strength: 0 off, 1 light, 2 medium, 3 strong (tolerance
+     * of 0/1/2 matching neighbours still counts as orphaned).
      */
-    private final BooleanProperty orphanClean = new SimpleBooleanProperty(false);
+    private final IntegerProperty orphanTolerance = new SimpleIntegerProperty(0);
     /**
      * Similarity tolerance for colour merging (ΔE2000); 0 disables merging.
      * Advanced parameters default to off; users opt in via the panel.
@@ -158,8 +159,8 @@ public final class AppState {
         return ditheringStrength;
     }
 
-    public BooleanProperty orphanCleanProperty() {
-        return orphanClean;
+    public IntegerProperty orphanToleranceProperty() {
+        return orphanTolerance;
     }
 
     public DoubleProperty mergeThresholdProperty() {

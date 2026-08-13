@@ -192,7 +192,7 @@ class BeadEngineTest {
         PatternProject legacy = BeadEngine.processImage(img, BOARD, palette, ImageDownsampler.Interpolation.BILINEAR);
         PatternProject options = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, false, 0.0, 1));
+                        BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
         assertArrayEquals(legacy.grid(), options.grid());
     }
 
@@ -201,10 +201,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject none = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, false, 0.0, 1));
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 0.0, 0, 0.0, 1));
         PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, false, 0.0, 1));
+                        BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
         assertArrayEquals(plain.grid(), none.grid());
     }
 
@@ -213,10 +213,10 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject plain = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.NONE, 1.0, false, 0.0, 1));
+                        BeadEngine.Dithering.NONE, 1.0, 0, 0.0, 1));
         PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false, 0.0, 1));
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 0.0, 1));
         assertFalse(Arrays.equals(plain.grid(), dithered.grid()),
                 "dithering should alter the quantized grid");
     }
@@ -237,7 +237,7 @@ class BeadEngineTest {
         }
         PatternProject cleaned = BeadEngine.processImage(img, small, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, true, 0.0, 1));
+                        BeadEngine.Dithering.NONE, 1.0, 1, 0.0, 1));
         int[][] result = cleaned.grid();
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
@@ -274,7 +274,7 @@ class BeadEngineTest {
         }
         PatternProject merged = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, false, 4.0, 10));
+                        BeadEngine.Dithering.NONE, 1.0, 0, 4.0, 10));
         for (int[] row : merged.grid()) {
             for (int cell : row) {
                 assertNotEquals(b, cell, "low-frequency colour should be merged away");
@@ -307,7 +307,7 @@ class BeadEngineTest {
         }
         PatternProject merged = BeadEngine.processImage(img, new BeadBoard(10, 10, 2.6, 10), palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
-                        BeadEngine.Dithering.NONE, 1.0, false, 4.0, 10));
+                        BeadEngine.Dithering.NONE, 1.0, 0, 4.0, 10));
         int countA = 0;
         for (int[] row : merged.grid()) {
             for (int cell : row) {
@@ -324,14 +324,39 @@ class BeadEngineTest {
         BufferedImage img = gradientImage();
         PatternProject dithered = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false, 0.0, 1));
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 0.0, 1));
         PatternProject merged = BeadEngine.processImage(img, BOARD, palette,
                 new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.BILINEAR,
-                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, false, 7.0, 1));
+                        BeadEngine.Dithering.FLOYD_STEINBERG, 1.0, 0, 7.0, 1));
         int coloursD = distinctColours(dithered.grid());
         int coloursM = distinctColours(merged.grid());
         assertTrue(coloursM <= coloursD,
                 "merging should not increase the colour count (" + coloursM + " > " + coloursD + ")");
+    }
+
+    @Test
+    void orphanToleranceControlsCleaning() {
+        // Colour 2 occupies two adjacent cells; each has exactly one matching
+        // neighbour. Light (tolerance 0) keeps them, Strong (tolerance 2) merges.
+        int r1 = palette.colorAt(1).r(), g1 = palette.colorAt(1).g(), b1 = palette.colorAt(1).b();
+        int r2 = palette.colorAt(2).r(), g2 = palette.colorAt(2).g(), b2 = palette.colorAt(2).b();
+        BufferedImage img = new BufferedImage(5, 5, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < 5; y++) {
+            for (int x = 0; x < 5; x++) {
+                boolean pair = (x == 1 || x == 2) && y == 2;
+                int argb = pair ? (0xFF000000 | (r2 << 16) | (g2 << 8) | b2)
+                        : (0xFF000000 | (r1 << 16) | (g1 << 8) | b1);
+                img.setRGB(x, y, argb);
+            }
+        }
+        PatternProject light = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Dithering.NONE, 1.0, 1, 0.0, 1));
+        PatternProject strong = BeadEngine.processImage(img, new BeadBoard(5, 5, 2.6, 10), palette,
+                new BeadEngine.ConversionOptions(ImageDownsampler.Interpolation.NEAREST,
+                        BeadEngine.Dithering.NONE, 1.0, 3, 0.0, 1));
+        assertEquals(2, light.grid()[2][1], "light cleaning must keep the pair");
+        assertEquals(1, strong.grid()[2][1], "strong cleaning must merge the pair");
     }
 
     private static int distinctColours(int[][] grid) {

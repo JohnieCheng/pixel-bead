@@ -68,9 +68,11 @@ public class LeftPanelController {
     @FXML
     private Label intensityValue;
     @FXML
-    private CheckBox orphanCheck;
+    private ComboBox<Integer> orphanCombo;
     @FXML
     private ComboBox<Double> mergeCombo;
+    @FXML
+    private VBox minShareGroup;
     @FXML
     private Spinner<Integer> minBeadsSpinner;
     @FXML
@@ -265,10 +267,49 @@ public class LeftPanelController {
         intensityValue.textProperty().bind(intensitySlider.valueProperty()
                 .map(v -> Math.round(v.doubleValue() * 100) + "%"));
 
-        orphanCheck.selectedProperty().bindBidirectional(state.orphanCleanProperty());
+        setupOrphanControls();
         setIntensityVisible(state.ditheringProperty().get() != BeadEngine.Dithering.NONE);
 
         setupMergeControls();
+    }
+
+    /** Orphan cleaning strength: Off / Light / Medium / Strong. */
+    private void setupOrphanControls() {
+        record Level(String label, int tolerance) {
+        }
+        List<Level> levels = List.of(
+                new Level("Off", 0),
+                new Level("Light", 1),
+                new Level("Medium", 2),
+                new Level("Strong", 3));
+        for (Level level : levels) {
+            orphanCombo.getItems().add(level.tolerance());
+        }
+        orphanCombo.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Integer tolerance) {
+                for (Level level : levels) {
+                    if (level.tolerance() == tolerance) {
+                        return level.label();
+                    }
+                }
+                return "Off";
+            }
+
+            @Override
+            public Integer fromString(String s) {
+                return null;
+            }
+        });
+        orphanCombo.valueProperty().addListener((obs, old, tolerance) -> {
+            if (tolerance != null) {
+                state.orphanToleranceProperty().set(tolerance);
+            }
+        });
+        if (!orphanCombo.getItems().contains(state.orphanToleranceProperty().get())) {
+            state.orphanToleranceProperty().set(0);
+        }
+        orphanCombo.setValue(state.orphanToleranceProperty().get());
     }
 
     /**
@@ -306,12 +347,14 @@ public class LeftPanelController {
         mergeCombo.valueProperty().addListener((obs, old, threshold) -> {
             if (threshold != null) {
                 state.mergeThresholdProperty().set(threshold);
+                setMinShareVisible(threshold > 0);
             }
         });
         if (!mergeCombo.getItems().contains(state.mergeThresholdProperty().get())) {
             state.mergeThresholdProperty().set(0.0);
         }
         mergeCombo.setValue(state.mergeThresholdProperty().get());
+        setMinShareVisible(state.mergeThresholdProperty().get() > 0);
 
         minBeadsSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 100, 1));
         // Spinner value is read-only; sync to the shared state via listener.
@@ -335,6 +378,12 @@ public class LeftPanelController {
     private void setIntensityVisible(boolean visible) {
         intensityGroup.setVisible(visible);
         intensityGroup.setManaged(visible);
+    }
+
+    /** Min share is only meaningful when colour merging is enabled. */
+    private void setMinShareVisible(boolean visible) {
+        minShareGroup.setVisible(visible);
+        minShareGroup.setManaged(visible);
     }
 
     /**

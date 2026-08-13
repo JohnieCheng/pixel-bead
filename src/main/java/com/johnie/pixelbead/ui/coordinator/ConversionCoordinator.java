@@ -61,7 +61,7 @@ public final class ConversionCoordinator {
         state.paletteProperty().addListener(obs -> regenerate());
         state.ditheringProperty().addListener(obs -> regenerate());
         state.ditheringStrengthProperty().addListener(obs -> regenerate());
-        state.orphanCleanProperty().addListener(obs -> regenerate());
+        state.orphanToleranceProperty().addListener(obs -> regenerate());
         state.mergeThresholdProperty().addListener(obs -> regenerate());
         state.mergeMinShareProperty().addListener(obs -> regenerate());
     }
@@ -130,7 +130,7 @@ public final class ConversionCoordinator {
                 interpolation,
                 state.ditheringProperty().get(),
                 state.ditheringStrengthProperty().get(),
-                state.orphanCleanProperty().get(),
+                state.orphanToleranceProperty().get(),
                 state.mergeThresholdProperty().get(),
                 Math.max(0, Math.min(100, state.mergeMinShareProperty().get())));
 
