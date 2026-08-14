@@ -200,7 +200,8 @@ public class LeftPanelController {
         beadSizeSpinner.setValueFactory(
                 new SpinnerValueFactory.DoubleSpinnerValueFactory(1.0, 10.0, current.beadSizeMm(), 0.1));
         subGridSpinner.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 25, current.subGridInterval()));
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                        1, Math.max(current.columns(), current.rows()), current.subGridInterval()));
         columnsSpinner.valueProperty().addListener(obs -> applyCustomBoard());
         rowsSpinner.valueProperty().addListener(obs -> applyCustomBoard());
         beadSizeSpinner.valueProperty().addListener(obs -> applyCustomBoard());

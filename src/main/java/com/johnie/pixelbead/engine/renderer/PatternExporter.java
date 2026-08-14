@@ -5,6 +5,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.w3c.dom.Element;
 
@@ -64,6 +66,94 @@ public final class PatternExporter {
                 cs.drawImage(pdImage, 0, 0, ptW, ptH);
             }
             doc.save(target.toFile());
+        }
+    }
+
+    /**
+     * Writes a multi-board PDF: an overview page followed by one page per
+     * sub-grid tile (the grid is split every {@code tileSize} rows/columns).
+     * Every page is A4 with the sheet scaled to fill the usable area plus a
+     * header naming the board and its row/column range, so the printed pages
+     * can be aligned onto real pegboards.
+     *
+     * @param tileSize sub-grid interval; values below 2 fall back to a single
+     *                 overview page
+     */
+    public static void writeTiledPdf(PatternProject project, int tileSize, Path target) throws IOException {
+        if (tileSize < 2) {
+            writePdf(project, target);
+            return;
+        }
+        int columns = project.board().columns();
+        int rows = project.board().rows();
+        int tileCols = (columns + tileSize - 1) / tileSize;
+        int tileRows = (rows + tileSize - 1) / tileSize;
+        int total = tileCols * tileRows;
+        int cell = (int) Math.round(project.board().beadSizeMm() / 25.4 * DPI);
+
+        BufferedImage img = renderAtScale(project);
+        try (PDDocument doc = new PDDocument()) {
+            // Overview page first, then one page per tile top-left to bottom-right.
+            addTiledPage(doc, img, "Overview  " + total + " boards", false);
+            int n = 1;
+            for (int ty = 0; ty < tileRows; ty++) {
+                for (int tx = 0; tx < tileCols; tx++) {
+                    int x0 = tx * tileSize;
+                    int y0 = ty * tileSize;
+                    int w = Math.min(tileSize, columns - x0);
+                    int h = Math.min(tileSize, rows - y0);
+                    BufferedImage tile = img.getSubimage(x0 * cell, y0 * cell, w * cell, h * cell);
+                    String header = String.format("Board %d/%d   Rows %d-%d   Cols %d-%d",
+                            n, total, y0 + 1, y0 + h, x0 + 1, x0 + w);
+                    addTiledPage(doc, tile, header, true);
+                    n++;
+                }
+            }
+            doc.save(target.toFile());
+        }
+    }
+
+    /**
+     * A4 page with the sheet scaled to fill the usable area, centred, with an
+     * optional header line and a board outline.
+     */
+    private static void addTiledPage(PDDocument doc, BufferedImage img, String header, boolean outline)
+            throws IOException {
+        PDPage page = new PDPage(PDRectangle.A4);
+        doc.addPage(page);
+        float pw = PDRectangle.A4.getWidth();
+        float ph = PDRectangle.A4.getHeight();
+        // ~12mm
+        float margin = 34f;
+        // header band
+        float headerH = 42f;
+        float availW = pw - 2 * margin;
+        float availH = ph - 2 * margin - headerH;
+        float scale = Math.min(availW / img.getWidth(), availH / img.getHeight());
+        float drawW = img.getWidth() * scale;
+        float drawH = img.getHeight() * scale;
+        float x = margin + (availW - drawW) / 2f;
+        float y = margin + headerH + (availH - drawH) / 2f;
+
+        ByteArrayOutputStream pngBytes = new ByteArrayOutputStream();
+        ImageIO.write(img, "png", pngBytes);
+        PDImageXObject pdImage = PDImageXObject.createFromByteArray(doc, pngBytes.toByteArray(), "tile");
+        try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
+            if (header != null) {
+                cs.beginText();
+                cs.setFont(new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD), 12);
+                cs.setNonStrokingColor(0.3f, 0.3f, 0.35f);
+                cs.newLineAtOffset(margin, ph - margin - 16);
+                cs.showText(header);
+                cs.endText();
+            }
+            cs.drawImage(pdImage, x, y, drawW, drawH);
+            if (outline) {
+                cs.setStrokingColor(0.45f, 0.45f, 0.5f);
+                cs.setLineWidth(1.2f);
+                cs.addRect(x, y, drawW, drawH);
+                cs.stroke();
+            }
         }
     }
 

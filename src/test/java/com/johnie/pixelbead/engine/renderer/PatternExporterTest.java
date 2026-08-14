@@ -5,6 +5,7 @@ import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -82,6 +83,32 @@ class PatternExporterTest {
             int cellSize = 59;
             int imgW = 36 + 3 * cellSize + 12;
             assertEquals(imgW * 72f / 300, widthPt, 0.5);
+        }
+    }
+
+    @Test
+    void tiledPdfAddsOnePagePerSubGridTile(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("tiled.pdf");
+        // 3x3 board with sub-grid 2 -> 2x2 tiles + overview = 5 pages.
+        PatternExporter.writeTiledPdf(project, 2, file);
+
+        try (PDDocument doc = Loader.loadPDF(file.toFile())) {
+            assertEquals(5, doc.getNumberOfPages());
+            // Every page is A4 (595 x 842 pt).
+            for (PDPage page : doc.getPages()) {
+                assertEquals(595.0f, page.getMediaBox().getWidth(), 0.5);
+                assertEquals(842.0f, page.getMediaBox().getHeight(), 0.5);
+            }
+        }
+    }
+
+    @Test
+    void tiledPdfFallsBackToSinglePageBelowIntervalTwo(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("flat.pdf");
+        PatternExporter.writeTiledPdf(project, 1, file);
+
+        try (PDDocument doc = Loader.loadPDF(file.toFile())) {
+            assertEquals(1, doc.getNumberOfPages());
         }
     }
 }

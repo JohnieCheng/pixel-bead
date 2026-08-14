@@ -99,7 +99,15 @@ public final class ExportCoordinator {
             throws Exception {
         switch (format) {
             case PNG -> PatternExporter.writePng(project, file);
-            case PDF -> PatternExporter.writePdf(project, file);
+            case PDF -> {
+                int tile = project.board().subGridInterval();
+                if (tile >= 2) {
+                    // Multi-board tiling: overview + one A4 page per sub-grid tile.
+                    PatternExporter.writeTiledPdf(project, tile, file);
+                } else {
+                    PatternExporter.writePdf(project, file);
+                }
+            }
             case TEXT -> PatternExporter.writeText(project, file);
         }
     }
