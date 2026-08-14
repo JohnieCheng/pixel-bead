@@ -49,9 +49,9 @@ public final class AppState {
      */
     private final IntegerProperty selectedColorIndex = new SimpleIntegerProperty(0);
     /**
-     * Active editing tool.
+     * Active editing tool; null until the user picks one.
      */
-    private final ObjectProperty<ToolType> activeTool = new SimpleObjectProperty<>(ToolType.BRUSH);
+    private final ObjectProperty<ToolType> activeTool = new SimpleObjectProperty<>();
     /**
      * Bumped on every grid edit; views repaint on change without re-fitting.
      */

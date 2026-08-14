@@ -3,7 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<ScrollPane fitToWidth="true" styleClass="side-scroll" xmlns:fx="http://javafx.com/fxml"
+<ScrollPane fitToWidth="true" vbarPolicy="NEVER" hbarPolicy="NEVER" styleClass="side-scroll"
+            xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.johnie.pixelbead.ui.panel.LeftPanelController">
     <VBox styleClass="side-panel" spacing="8" prefWidth="230" maxWidth="Infinity">
         <padding>
@@ -11,8 +12,7 @@
         </padding>
         <Label styleClass="panel-title" text="%label.tools"/>
         <HBox spacing="6">
-            <ToggleButton fx:id="brushTool" text="%button.brush" maxWidth="Infinity" HBox.hgrow="ALWAYS"
-                          selected="true"/>
+            <ToggleButton fx:id="brushTool" text="%button.brush" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
             <ToggleButton fx:id="eraserTool" text="%button.eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
             <ToggleButton fx:id="pickerTool" text="%button.pick" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
         </HBox>
@@ -47,7 +47,7 @@
         <ComboBox fx:id="quantizationCombo" maxWidth="Infinity"/>
         <Label text="%label.dithering"/>
         <ComboBox fx:id="ditheringCombo" maxWidth="Infinity"/>
-        <TitledPane text="%label.advanced" expanded="false" maxWidth="Infinity">
+        <TitledPane text="%label.advanced" expanded="false" animated="false" maxWidth="Infinity">
             <VBox spacing="8">
                 <VBox fx:id="intensityGroup" spacing="6">
                     <Label text="%label.intensity"/>

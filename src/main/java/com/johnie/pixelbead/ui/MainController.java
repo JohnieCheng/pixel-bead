@@ -21,6 +21,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
@@ -124,6 +125,21 @@ public class MainController {
                         previewButton.setSelected(!previewButton.isSelected());
                         onTogglePreview();
                     });
+            // Space is a pan modifier: forward the press/release to the canvas
+            // so dragging works without clicking the canvas first. The event
+            // is consumed so a focused button cannot fire on Space.
+            scene.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+                if (e.getCode() == KeyCode.SPACE) {
+                    canvas.setSpaceDown(true);
+                    e.consume();
+                }
+            });
+            scene.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+                if (e.getCode() == KeyCode.SPACE) {
+                    canvas.setSpaceDown(false);
+                    e.consume();
+                }
+            });
         });
     }
 

@@ -5,17 +5,20 @@ import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.enums.Theme;
+import com.johnie.pixelbead.enums.ToolType;
 import com.johnie.pixelbead.ui.state.AppState;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.input.ZoomEvent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 
@@ -40,33 +43,14 @@ public class InteractiveCanvas extends Canvas {
     // Theme colors (kept in sync with css/style.css): bg, cellLine, subGridLine,
     // border, emptyHint, accent.
     private static final Color[] DARK = {
-            Color.web("#1E2228"), Color.web("#2B303B"), Color.web("#3A3F4B"), Color.web("#565C6A"), Color.web("#9AA2B0"), Color.web("#61AFEF")
+            Color.web("#15171C"), Color.web("#2A2E37"), Color.web("#383D48"), Color.web("#4A5160"), Color.web("#9BA3B2"), Color.web("#7C8CF8")
     };
     private static final Color[] LIGHT = {
-            Color.web("#F5F6F8"), Color.web("#E3E6EA"), Color.web("#C9D1D9"), Color.web("#9AA4AF"), Color.web("#59636E"), Color.web("#3B82C4")
+            Color.web("#F6F6F8"), Color.web("#E7E8ED"), Color.web("#D8DAE2"), Color.web("#C4C8D4"), Color.web("#5C6472"), Color.web("#6C7CF0")
     };
-
-    private Color bg = DARK[0];
-    private Color cellLine = DARK[1];
-    private Color subGridLine = DARK[2];
-    private Color border = DARK[3];
-    private Color emptyHint = DARK[4];
-    private Color accent = DARK[5];
-
     private final ObjectProperty<PatternProject> project = new SimpleObjectProperty<>();
     private final ObjectProperty<String> hoverInfo = new SimpleObjectProperty<>("");
-
-    private double scale = 12.0;
-    private double offsetX = 0.0;
-    private double offsetY = 0.0;
-    private boolean panning = false;
-    private double lastX;
-    private double lastY;
-    private boolean spaceDown = false;
-    private boolean strokeStarted = false;
-
     private final AppState state = AppState.get();
-
     /**
      * Palette index whose cells pulse-highlight when hovering the count table.
      */
@@ -76,13 +60,25 @@ public class InteractiveCanvas extends Canvas {
      */
     private final IntegerProperty previewFrom = new SimpleIntegerProperty(-1);
     private final IntegerProperty previewTo = new SimpleIntegerProperty(-1);
+    private Color bg = DARK[0];
+    private Color cellLine = DARK[1];
+    private Color subGridLine = DARK[2];
+    private Color border = DARK[3];
+    private Color emptyHint = DARK[4];
+    private Color accent = DARK[5];
+    private double scale = 12.0;
+    private double offsetX = 0.0;
+    private double offsetY = 0.0;
+    private boolean panning = false;
+    private double lastX;
+    private double lastY;
+    private boolean spaceDown = false;
+    private boolean strokeStarted = false;
     private long animStart = -1;
-
     /**
      * When true, grid lines and border are hidden for a finished-bead look.
      */
     private boolean previewMode = false;
-
     public InteractiveCanvas() {
         // Canvas is not Resizable; containers never stretch it. Bind our size
         // to the parent region so the drawing surface follows the layout.
@@ -107,8 +103,13 @@ public class InteractiveCanvas extends Canvas {
             }
         });
         setOnScroll(this::handleScroll);
+        setOnZoom(this::handleZoom);
         setOnMousePressed(this::handlePressed);
         setOnMouseDragged(this::handleDragged);
+        setOnMouseReleased(e -> {
+            panning = false;
+            updateCursor();
+        });
         setOnMouseMoved(this::handleMoved);
         setOnMouseExited(e -> hoverInfo.set(""));
         // Grid edits repaint in place; the viewport must not re-fit.
@@ -143,6 +144,25 @@ public class InteractiveCanvas extends Canvas {
             }
         });
         applyTheme(state.themeProperty().get());
+    }
+
+    /**
+     * Scene-level space key state (the canvas only has focus after a click,
+     * so the key events are forwarded from MainController).
+     */
+    public void setSpaceDown(boolean down) {
+        spaceDown = down;
+        updateCursor();
+    }
+
+    private void updateCursor() {
+        if (panning) {
+            setCursor(Cursor.CLOSED_HAND);
+        } else if (spaceDown || state.activeToolProperty().get() == null) {
+            setCursor(Cursor.OPEN_HAND);
+        } else {
+            setCursor(Cursor.DEFAULT);
+        }
     }
 
     private void applyTheme(Theme theme) {
@@ -382,6 +402,14 @@ public class InteractiveCanvas extends Canvas {
     }
 
     private void handleScroll(ScrollEvent e) {
+        if (e.getTouchCount() > 0) {
+            // Trackpad two-finger scroll pans the canvas.
+            offsetX += e.getDeltaX();
+            offsetY += e.getDeltaY();
+            redraw();
+            return;
+        }
+        // Mouse wheel zooms around the cursor.
         double mx = e.getX();
         double my = e.getY();
         double factor = e.getDeltaY() > 0 ? ZOOM_STEP : 1.0 / ZOOM_STEP;
@@ -396,11 +424,28 @@ public class InteractiveCanvas extends Canvas {
         redraw();
     }
 
+    /**
+     * Trackpad pinch-to-zoom, centred on the pinch focal point.
+     */
+    private void handleZoom(ZoomEvent e) {
+        double newScale = Math.clamp(scale * e.getZoomFactor(), MIN_SCALE, MAX_SCALE);
+        if (newScale == scale) {
+            return;
+        }
+        offsetX = e.getX() - (e.getX() - offsetX) * (newScale / scale);
+        offsetY = e.getY() - (e.getY() - offsetY) * (newScale / scale);
+        scale = newScale;
+        redraw();
+    }
+
     private void handlePressed(MouseEvent e) {
-        if (spaceDown || e.isMiddleButtonDown()) {
+        boolean noTool = state.activeToolProperty().get() == null;
+        if (spaceDown || e.isMiddleButtonDown() || e.isSecondaryButtonDown()
+                || (e.isPrimaryButtonDown() && noTool)) {
             panning = true;
             lastX = e.getX();
             lastY = e.getY();
+            updateCursor();
         } else if (e.isPrimaryButtonDown()) {
             // New edit stroke: push the pre-edit snapshot on the first mutation.
             strokeStarted = false;
@@ -440,7 +485,11 @@ public class InteractiveCanvas extends Canvas {
         if (cellX < 0 || cellY < 0 || cellX >= p.board().columns() || cellY >= p.board().rows()) {
             return;
         }
-        switch (state.activeToolProperty().get()) {
+        ToolType tool = state.activeToolProperty().get();
+        if (tool == null) {
+            return; // no tool selected yet
+        }
+        switch (tool) {
             case BRUSH -> {
                 int idx = state.selectedColorIndexProperty().get();
                 if (idx < 0 || idx >= p.palette().size()) {

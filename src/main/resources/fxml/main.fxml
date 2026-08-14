@@ -8,10 +8,11 @@
             prefWidth="1280" prefHeight="800">
     <top>
         <ToolBar>
-            <Button fx:id="importButton" text="%button.importImage" onAction="#onImportImage"/>
+            <Button fx:id="importButton" styleClass="primary" text="%button.importImage" onAction="#onImportImage"/>
             <Separator/>
             <ComboBox fx:id="formatCombo" prefWidth="90"/>
-            <Button fx:id="exportButton" text="%button.export" onAction="#onExport" disable="true"/>
+            <Button fx:id="exportButton" styleClass="primary" text="%button.export" onAction="#onExport"
+                    disable="true"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="%button.fitView" onAction="#onFitView"/>
             <ToggleButton fx:id="previewButton" text="%button.preview" onAction="#onTogglePreview"/>

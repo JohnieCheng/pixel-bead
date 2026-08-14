@@ -4,65 +4,69 @@
    ============================================================ */
 
 .root.theme-dark {
-    -pixel-bg: #1E2228;
-    -pixel-panel: #232830;
-    -pixel-panel-alt: #20242B;
-    -pixel-elevated: #2B303B;
-    -pixel-hover: #333945;
-    -pixel-selected: #313B47;
-    -pixel-border: #2E333D;
-    -pixel-border-strong: #3A3F4B;
+    -pixel-bg: #15171C;
+    -pixel-panel: #1D2026;
+    -pixel-panel-alt: #191C22;
+    -pixel-elevated: #262A33;
+    -pixel-hover: #2E333D;
+    -pixel-selected: #323A4A;
+    -pixel-border: #2A2E37;
+    -pixel-border-strong: #383D48;
     -pixel-border-bright: #4A5160;
-    -pixel-text: #D8DEE9;
-    -pixel-text-dim: #9AA2B0;
-    -pixel-text-faint: #6B7280;
-    -pixel-accent: #61AFEF;
-    -pixel-overlay: rgba(30, 34, 40, 0.72);
+    -pixel-text: #E4E7EC;
+    -pixel-text-dim: #9BA3B2;
+    -pixel-text-faint: #6E7684;
+    -pixel-accent: #7C8CF8;
+    -pixel-accent-soft: rgba(124, 140, 248, 0.16);
+    -pixel-overlay: rgba(21, 23, 28, 0.72);
+    -pixel-radius: 10;
 
-    -fx-base: #232830;
-    -fx-background: #1E2228;
-    -fx-control-inner-background: #232830;
-    -fx-control-inner-background-alt: #20242B;
-    -fx-text-base-color: #D8DEE9;
-    -fx-text-fill: #D8DEE9;
-    -fx-text-background-color: #D8DEE9;
-    -fx-accent: #61AFEF;
-    -fx-focus-color: #61AFEF;
+    -fx-base: #1D2026;
+    -fx-background: #15171C;
+    -fx-control-inner-background: #1D2026;
+    -fx-control-inner-background-alt: #191C22;
+    -fx-text-base-color: #E4E7EC;
+    -fx-text-fill: #E4E7EC;
+    -fx-text-background-color: #E4E7EC;
+    -fx-accent: #7C8CF8;
+    -fx-focus-color: #7C8CF8;
     -fx-faint-focus-color: transparent;
-    -fx-selection-bar: #2B303B;
-    -fx-selection-bar-non-focused: #2B303B;
+    -fx-selection-bar: #262A33;
+    -fx-selection-bar-non-focused: #262A33;
     -fx-background-radius: 6;
     -fx-background-insets: 0;
 }
 
 .root.theme-light {
-    -pixel-bg: #F5F6F8;
+    -pixel-bg: #F6F6F8;
     -pixel-panel: #FFFFFF;
-    -pixel-panel-alt: #F0F2F5;
-    -pixel-elevated: #FAFBFC;
-    -pixel-hover: #EFF1F4;
-    -pixel-selected: #D6E4F5;
-    -pixel-border: #E3E6EA;
-    -pixel-border-strong: #D0D5DC;
-    -pixel-border-bright: #C2C8D1;
-    -pixel-text: #1F2328;
-    -pixel-text-dim: #59636E;
-    -pixel-text-faint: #8A94A3;
-    -pixel-accent: #3B82C4;
-    -pixel-overlay: rgba(245, 246, 248, 0.72);
+    -pixel-panel-alt: #F1F2F5;
+    -pixel-elevated: #FBFBFC;
+    -pixel-hover: #F0F1F5;
+    -pixel-selected: #E4E8FB;
+    -pixel-border: #E7E8ED;
+    -pixel-border-strong: #D8DAE2;
+    -pixel-border-bright: #C4C8D4;
+    -pixel-text: #1B1D23;
+    -pixel-text-dim: #5C6472;
+    -pixel-text-faint: #8E95A5;
+    -pixel-accent: #6C7CF0;
+    -pixel-accent-soft: rgba(108, 124, 240, 0.12);
+    -pixel-overlay: rgba(246, 246, 248, 0.72);
+    -pixel-radius: 10;
 
     -fx-base: #FFFFFF;
-    -fx-background: #F5F6F8;
+    -fx-background: #F6F6F8;
     -fx-control-inner-background: #FFFFFF;
-    -fx-control-inner-background-alt: #F0F2F5;
-    -fx-text-base-color: #1F2328;
-    -fx-text-fill: #1F2328;
-    -fx-text-background-color: #1F2328;
-    -fx-accent: #3B82C4;
-    -fx-focus-color: #3B82C4;
+    -fx-control-inner-background-alt: #F1F2F5;
+    -fx-text-base-color: #1B1D23;
+    -fx-text-fill: #1B1D23;
+    -fx-text-background-color: #1B1D23;
+    -fx-accent: #6C7CF0;
+    -fx-focus-color: #6C7CF0;
     -fx-faint-focus-color: transparent;
-    -fx-selection-bar: #FAFBFC;
-    -fx-selection-bar-non-focused: #FAFBFC;
+    -fx-selection-bar: #FBFBFC;
+    -fx-selection-bar-non-focused: #FBFBFC;
     -fx-background-radius: 6;
     -fx-background-insets: 0;
 }
@@ -79,43 +83,58 @@
     -fx-background-color: -pixel-panel;
     -fx-border-color: transparent transparent -pixel-border transparent;
     -fx-border-width: 0 0 1 0;
-    -fx-padding: 6 12 6 12;
+    -fx-padding: 8 14 8 14;
 }
 
 /* ---------- buttons ---------- */
 
 .button {
     -fx-background-color: -pixel-elevated;
-    -fx-background-radius: 6;
+    -fx-background-radius: 10;
     -fx-border-color: -pixel-border-strong;
-    -fx-border-radius: 6;
+    -fx-border-radius: 10;
     -fx-text-fill: -pixel-text;
-    -fx-padding: 5 14 5 14;
+    -fx-padding: 6 16 6 16;
     -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.06), 4, 0, 0, 1);
 }
 
 .button:hover {
     -fx-background-color: -pixel-hover;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 8, 0, 0, 2);
 }
 
 .button:pressed {
     -fx-background-color: -pixel-panel-alt;
+    -fx-effect: none;
 }
 
 .button:disabled {
     -fx-opacity: 0.45;
     -fx-cursor: default;
+    -fx-effect: none;
+}
+
+/* Primary action buttons (import / export): accent fill for a modern look. */
+.button.primary {
+    -fx-background-color: -pixel-accent;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+
+.button.primary:hover {
+    -fx-background-color: derive(-pixel-accent, 10%);
 }
 
 /* toggle buttons share the button look */
 
 .toggle-button {
     -fx-background-color: -pixel-elevated;
-    -fx-background-radius: 6;
+    -fx-background-radius: 10;
     -fx-border-color: -pixel-border-strong;
-    -fx-border-radius: 6;
+    -fx-border-radius: 10;
     -fx-text-fill: -pixel-text;
-    -fx-padding: 5 8 5 8;
+    -fx-padding: 6 10 6 10;
     -fx-cursor: hand;
 }
 
@@ -124,23 +143,28 @@
 }
 
 .toggle-button:selected {
-    -fx-background-color: -pixel-selected;
+    -fx-background-color: -pixel-accent-soft;
     -fx-border-color: -pixel-accent;
+    -fx-text-fill: -pixel-accent;
 }
 
 /* ---------- combo box ---------- */
 
 .combo-box {
     -fx-background-color: -pixel-elevated;
-    -fx-background-radius: 6;
+    -fx-background-radius: 10;
     -fx-border-color: -pixel-border-strong;
-    -fx-border-radius: 6;
+    -fx-border-radius: 10;
     -fx-text-fill: -pixel-text;
     -fx-padding: 2 4 2 4;
 }
 
 .combo-box:hover {
     -fx-background-color: -pixel-hover;
+}
+
+.combo-box:focused {
+    -fx-border-color: -pixel-accent;
 }
 
 .combo-box .list-cell {
@@ -159,16 +183,18 @@
 
 .combo-box-popup .list-view {
     -fx-background-color: -pixel-panel;
-    -fx-background-radius: 6;
+    -fx-background-radius: 10;
     -fx-border-color: -pixel-border-strong;
-    -fx-border-radius: 6;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 12, 0, 0, 4);
+    -fx-border-radius: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 16, 0, 0, 6);
+    -fx-padding: 4;
 }
 
 .combo-box-popup .list-cell {
     -fx-background-color: transparent;
     -fx-text-fill: -pixel-text;
     -fx-padding: 6 10 6 10;
+    -fx-background-radius: 6;
 }
 
 .combo-box-popup .list-cell:hover {
@@ -176,16 +202,88 @@
 }
 
 .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -pixel-accent-soft;
+    -fx-text-fill: -pixel-accent;
+}
+
+/* ---------- text fields & spinners ---------- */
+
+.text-field,
+.spinner {
+    -fx-background-color: -pixel-elevated;
+    -fx-background-radius: 10;
+    -fx-border-color: -pixel-border-strong;
+    -fx-border-radius: 10;
+    -fx-text-fill: -pixel-text;
+    -fx-padding: 5 10 5 10;
+}
+
+.text-field:focused,
+.spinner:focused {
+    -fx-border-color: -pixel-accent;
+}
+
+.spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-radius: 0;
+    -fx-padding: 3 6 3 6;
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: transparent;
+}
+
+/* ---------- check boxes ---------- */
+
+.check-box .box {
+    -fx-background-color: -pixel-elevated;
+    -fx-background-radius: 6;
+    -fx-border-color: -pixel-border-strong;
+    -fx-border-radius: 6;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -pixel-accent;
+    -fx-border-color: -pixel-accent;
+}
+
+.check-box:selected .mark {
+    -fx-background-color: white;
+}
+
+/* ---------- titled pane (advanced panel) ---------- */
+
+.titled-pane {
+    -fx-text-fill: -pixel-text;
+}
+
+.titled-pane > .title {
+    -fx-background-color: -pixel-panel-alt;
+    -fx-background-radius: 10;
+    -fx-padding: 8 12 8 12;
+}
+
+.titled-pane > .title:hover {
     -fx-background-color: -pixel-hover;
+}
+
+.titled-pane > .content {
+    -fx-background-color: -pixel-panel;
+    -fx-background-radius: 0 0 10 10;
+    -fx-border-color: -pixel-border;
+    -fx-border-radius: 0 0 10 10;
+    -fx-padding: 10;
 }
 
 /* ---------- table view ---------- */
 
 .table-view {
     -fx-background-color: -pixel-panel;
-    -fx-background-radius: 6;
+    -fx-background-radius: 12;
     -fx-border-color: -pixel-border;
-    -fx-border-radius: 6;
+    -fx-border-radius: 12;
     -fx-padding: 0;
 }
 
@@ -241,6 +339,14 @@
 
 .scroll-bar {
     -fx-background-color: transparent;
+}
+
+.scroll-bar:vertical {
+    -fx-pref-width: 10;
+}
+
+.scroll-bar:horizontal {
+    -fx-pref-height: 10;
 }
 
 .scroll-bar .thumb {
@@ -317,8 +423,9 @@
 .tooltip {
     -fx-background-color: -pixel-elevated;
     -fx-text-fill: -pixel-text;
-    -fx-background-radius: 4;
+    -fx-background-radius: 8;
     -fx-font-size: 11px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 3);
 }
 
 /* ---------- crop dialog ---------- */
@@ -387,7 +494,8 @@
 .panel-title {
     -fx-font-weight: bold;
     -fx-text-fill: -pixel-text;
-    -fx-font-size: 12px;
+    -fx-font-size: 13px;
+    -fx-padding: 0 0 4 0;
 }
 
 .pattern-info {
