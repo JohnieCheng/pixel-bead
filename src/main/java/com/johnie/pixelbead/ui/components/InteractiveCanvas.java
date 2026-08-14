@@ -541,8 +541,9 @@ public class InteractiveCanvas extends Canvas {
         if (idx >= 0) {
             BeadColor c = p.palette().colorAt(idx);
             info.append("  ").append(c.code());
+            info.append(String.format("  #%02X%02X%02X", c.r(), c.g(), c.b()));
             if (!c.name().isEmpty()) {
-                info.append(" ").append(c.name());
+                info.append("  ").append(c.name());
             }
         } else {
             info.append("  (empty)");

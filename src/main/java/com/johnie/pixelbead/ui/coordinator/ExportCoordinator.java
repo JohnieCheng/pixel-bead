@@ -66,9 +66,9 @@ public final class ExportCoordinator {
                 chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PDF Document", "*.pdf"));
                 chooser.setInitialFileName("pattern.pdf");
             }
-            case TEXT -> {
-                chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text", "*.txt"));
-                chooser.setInitialFileName("pattern.txt");
+            case CSV -> {
+                chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV (Spreadsheet)", "*.csv"));
+                chooser.setInitialFileName("pattern.csv");
             }
         }
         File file = chooser.showSaveDialog(exportButton.getScene().getWindow());
@@ -108,7 +108,7 @@ public final class ExportCoordinator {
                     PatternExporter.writePdf(project, file);
                 }
             }
-            case TEXT -> PatternExporter.writeText(project, file);
+            case CSV -> PatternExporter.writeCsv(project, file);
         }
     }
 

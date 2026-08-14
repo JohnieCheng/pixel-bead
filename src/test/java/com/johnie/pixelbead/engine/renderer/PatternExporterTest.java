@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -39,23 +40,10 @@ class PatternExporterTest {
         for (int[] row : grid) {
             Arrays.fill(row, -1);
         }
-        grid[1][1] = 5;
-        grid[0][2] = 0;
-        grid[2][0] = 12;
+        grid[1][1] = 9;   // A10
+        grid[0][2] = 0;   // A1
+        grid[2][0] = 1;   // A2
         project = new PatternProject(board, palette, grid);
-    }
-
-    @Test
-    void textExportMatchesGridShape(@TempDir Path dir) throws IOException {
-        Path file = dir.resolve("pattern.txt");
-        PatternExporter.writeText(project, file);
-
-        assertEquals(3, Files.readAllLines(file).size());
-        String line = Files.readAllLines(file).get(0);
-        // Row 0: empty, empty, palette index 0 -> ". . CE001"
-        assertEquals(". . " + project.palette().colorAt(0).code(), line);
-        // Row 1: empty, index 5, empty
-        assertEquals(". " + project.palette().colorAt(5).code() + " .", Files.readAllLines(file).get(1));
     }
 
     @Test
@@ -109,6 +97,24 @@ class PatternExporterTest {
 
         try (PDDocument doc = Loader.loadPDF(file.toFile())) {
             assertEquals(1, doc.getNumberOfPages());
+        }
+    }
+
+    @Test
+    void csvExportListsUsedColoursNaturallySorted(@TempDir Path dir) throws IOException {
+        Path file = dir.resolve("list.csv");
+        PatternExporter.writeCsv(project, file);
+
+        List<String> lines = Files.readAllLines(file);
+        assertEquals("code,hex,count", lines.get(0).replace("\uFEFF", ""));
+        // Header + one row per used colour.
+        assertEquals(4, lines.size());
+        // Natural order: row 2 is A2 (not A10), proving numeric sort.
+        assertTrue(lines.get(1).startsWith("A1,"));
+        assertTrue(lines.get(2).startsWith("A2,"));
+        assertTrue(lines.get(3).startsWith("A10,"));
+        for (int i = 1; i < lines.size(); i++) {
+            assertTrue(lines.get(i).matches("[A-Z]+\\d+,#[0-9A-F]{6},\\d+"));
         }
     }
 }

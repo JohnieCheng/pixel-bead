@@ -56,7 +56,7 @@ class I18nTest {
                 OrphanLevel.OFF, OrphanLevel.LIGHT, OrphanLevel.MEDIUM, OrphanLevel.STRONG,
                 MergePreset.OFF, MergePreset.CONSERVATIVE, MergePreset.STANDARD,
                 MergePreset.AGGRESSIVE, MergePreset.EXTREME,
-                ExportFormat.PNG, ExportFormat.PDF, ExportFormat.TEXT,
+                ExportFormat.PNG, ExportFormat.PDF, ExportFormat.CSV,
                 PaletteChoice.STANDARD_221, PaletteChoice.FULL_291,
         };
     }

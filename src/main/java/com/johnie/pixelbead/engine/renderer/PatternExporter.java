@@ -1,6 +1,11 @@
 package com.johnie.pixelbead.engine.renderer;
 
+import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.PatternProject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -157,18 +162,56 @@ public final class PatternExporter {
         }
     }
 
-    public static void writeText(PatternProject project, Path target) throws IOException {
-        int[][] grid = project.grid();
-        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(target, StandardCharsets.UTF_8))) {
-            for (int[] row : grid) {
-                for (int x = 0; x < row.length; x++) {
-                    if (x > 0) {
-                        writer.print(' ');
-                    }
-                    writer.print(row[x] >= 0 ? project.palette().colorAt(row[x]).code() : ".");
+    /**
+     * Writes a bead shopping list as CSV: {@code code,hex,count} per used
+     * colour, naturally sorted by code (A1, A2, ..., A10, B1, ...).
+     */
+    public static void writeCsv(PatternProject project, Path target) throws IOException {
+        int[] counts = new int[project.palette().size()];
+        for (int[] row : project.grid()) {
+            for (int idx : row) {
+                if (idx >= 0) {
+                    counts[idx]++;
                 }
-                writer.println();
             }
+        }
+        List<Integer> used = new ArrayList<>();
+        for (int i = 0; i < counts.length; i++) {
+            if (counts[i] > 0) {
+                used.add(i);
+            }
+        }
+        used.sort((a, b) -> compareCodes(
+                project.palette().colorAt(a).code(), project.palette().colorAt(b).code()));
+        try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(target, StandardCharsets.UTF_8))) {
+            // UTF-8 BOM so Excel (esp. Chinese locale) decodes the file correctly.
+            writer.print('\uFEFF');
+            writer.println("code,hex,count");
+            for (int idx : used) {
+                BeadColor c = project.palette().colorAt(idx);
+                writer.printf("%s,#%02X%02X%02X,%d%n", c.code(), c.r(), c.g(), c.b(), counts[idx]);
+            }
+        }
+    }
+
+    /** Natural order for colour codes: letter prefix first, then the number. */
+    private static int compareCodes(String a, String b) {
+        int i = 0;
+        while (i < a.length() && Character.isLetter(a.charAt(i))) {
+            i++;
+        }
+        int j = 0;
+        while (j < b.length() && Character.isLetter(b.charAt(j))) {
+            j++;
+        }
+        int cmp = a.substring(0, i).compareTo(b.substring(0, j));
+        if (cmp != 0) {
+            return cmp;
+        }
+        try {
+            return Integer.compare(Integer.parseInt(a.substring(i)), Integer.parseInt(b.substring(j)));
+        } catch (NumberFormatException e) {
+            return a.substring(i).compareTo(b.substring(j));
         }
     }
 

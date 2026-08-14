@@ -10,7 +10,7 @@ import com.johnie.pixelbead.util.I18n;
  * @since 2026/08/13
  */
 public enum ExportFormat implements I18n.Key {
-    PNG, PDF, TEXT;
+    PNG, PDF, CSV;
 
     /**
      * Full key prefix: enum.exportformat.
