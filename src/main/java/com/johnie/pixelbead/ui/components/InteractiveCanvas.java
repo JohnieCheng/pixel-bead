@@ -41,12 +41,15 @@ public class InteractiveCanvas extends Canvas {
     private static final double ZOOM_STEP = 1.15;
 
     // Theme colors (kept in sync with css/style.css): bg, cellLine, subGridLine,
-    // border, emptyHint, accent.
+    // border, emptyHint, accent. Grid lines are faint (10-15% opacity) so they
+    // guide without competing with the beads.
     private static final Color[] DARK = {
-            Color.web("#15171C"), Color.web("#2A2E37"), Color.web("#383D48"), Color.web("#4A5160"), Color.web("#9BA3B2"), Color.web("#7C8CF8")
+            Color.rgb(21, 23, 28), Color.rgb(255, 255, 255, 0.10), Color.rgb(255, 255, 255, 0.16),
+            Color.web("#4A5160"), Color.web("#9BA3B2"), Color.web("#7C5CFC")
     };
     private static final Color[] LIGHT = {
-            Color.web("#F6F6F8"), Color.web("#E7E8ED"), Color.web("#D8DAE2"), Color.web("#C4C8D4"), Color.web("#5C6472"), Color.web("#6C7CF0")
+            Color.rgb(245, 247, 250), Color.rgb(0, 0, 0, 0.08), Color.rgb(0, 0, 0, 0.14),
+            Color.web("#C8CDD6"), Color.web("#8C92A4"), Color.web("#6C5CE7")
     };
     private final ObjectProperty<PatternProject> project = new SimpleObjectProperty<>();
     private final ObjectProperty<String> hoverInfo = new SimpleObjectProperty<>("");

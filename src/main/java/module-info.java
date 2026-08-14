@@ -16,6 +16,10 @@ module com.johnie.pixelbead {
 
     requires org.controlsfx.controls;
     requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.core;
+    requires org.kordamp.ikonli.fontawesome5;
+
+    uses org.kordamp.ikonli.IkonProvider;
 
     opens com.johnie.pixelbead to javafx.fxml;
     opens com.johnie.pixelbead.ui to javafx.fxml;

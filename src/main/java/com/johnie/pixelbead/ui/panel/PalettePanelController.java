@@ -78,7 +78,10 @@ public class PalettePanelController {
             BeadColor color = palette.colorAt(i);
             Rectangle swatch = new Rectangle(SWATCH_SIZE, SWATCH_SIZE);
             swatch.setFill(Color.rgb(color.r(), color.g(), color.b()));
-            swatch.setStroke(Color.web("#3A3F4B"));
+            swatch.setArcWidth(4);
+            swatch.setArcHeight(4);
+            // Faint inset-like edge instead of a hard black border.
+            swatch.setStroke(Color.rgb(0, 0, 0, 0.08));
             swatch.setStrokeWidth(1);
             Tooltip.install(swatch, new Tooltip(color.code()));
             final int index = i;
@@ -116,10 +119,10 @@ public class PalettePanelController {
             Node node = palettePane.getChildren().get(i);
             if (node instanceof Rectangle swatch) {
                 if (i == selected) {
-                    swatch.setStroke(Color.web("#61AFEF"));
+                    swatch.setStroke(Color.web("#6C5CE7"));
                     swatch.setStrokeWidth(2);
                 } else {
-                    swatch.setStroke(Color.web("#3A3F4B"));
+                    swatch.setStroke(Color.rgb(0, 0, 0, 0.08));
                     swatch.setStrokeWidth(1);
                 }
             }

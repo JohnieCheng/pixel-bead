@@ -44,7 +44,7 @@
         </HBox>
     </bottom>
     <center>
-        <StackPane>
+        <StackPane styleClass="canvas-wrap">
             <InteractiveCanvas fx:id="canvas"/>
             <StackPane fx:id="loadingOverlay" styleClass="loading-overlay" visible="false" managed="false">
                 <VBox alignment="CENTER" spacing="12">

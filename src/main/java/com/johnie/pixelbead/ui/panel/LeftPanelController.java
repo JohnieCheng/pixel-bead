@@ -107,7 +107,10 @@ public class LeftPanelController {
         eraserTool.setToggleGroup(tools);
         pickerTool.setToggleGroup(tools);
         tools.selectedToggleProperty().addListener((obs, old, sel) -> {
-            if (sel == eraserTool) {
+            if (sel == null) {
+                // Clicking the active tool again deselects it: no tool active.
+                state.activeToolProperty().set(null);
+            } else if (sel == eraserTool) {
                 state.activeToolProperty().set(ToolType.ERASER);
             } else if (sel == pickerTool) {
                 state.activeToolProperty().set(ToolType.EYEDROPPER);

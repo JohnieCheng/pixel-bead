@@ -3,6 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <ScrollPane fitToWidth="true" vbarPolicy="NEVER" hbarPolicy="NEVER" styleClass="side-scroll"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.johnie.pixelbead.ui.panel.LeftPanelController">
@@ -11,10 +12,16 @@
             <Insets top="12" right="12" bottom="12" left="12"/>
         </padding>
         <Label styleClass="panel-title" text="%label.tools"/>
-        <HBox spacing="6">
-            <ToggleButton fx:id="brushTool" text="%button.brush" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-            <ToggleButton fx:id="eraserTool" text="%button.eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
-            <ToggleButton fx:id="pickerTool" text="%button.pick" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+        <HBox styleClass="segmented" spacing="0" maxWidth="Infinity">
+            <ToggleButton fx:id="brushTool" text="%button.brush" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                <graphic><FontIcon iconLiteral="fas-pencil-alt" iconSize="11"/></graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="eraserTool" text="%button.eraser" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                <graphic><FontIcon iconLiteral="fas-eraser" iconSize="11"/></graphic>
+            </ToggleButton>
+            <ToggleButton fx:id="pickerTool" text="%button.pick" maxWidth="Infinity" HBox.hgrow="ALWAYS">
+                <graphic><FontIcon iconLiteral="fas-eye-dropper" iconSize="11"/></graphic>
+            </ToggleButton>
         </HBox>
         <HBox spacing="6">
             <Button fx:id="undoButton" text="%button.undo" maxWidth="Infinity" HBox.hgrow="ALWAYS" onAction="#onUndo"
