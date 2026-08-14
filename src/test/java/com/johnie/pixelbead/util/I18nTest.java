@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * constant without a translation fails the build instead of showing raw keys.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/13
  */
 class I18nTest {

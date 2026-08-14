@@ -6,7 +6,7 @@ import com.johnie.pixelbead.util.I18n;
  * Colour merge presets: the ΔE2000 similarity threshold for merging.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/13
  */
 public enum MergePreset implements I18n.Key {

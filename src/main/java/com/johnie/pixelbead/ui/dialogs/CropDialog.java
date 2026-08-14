@@ -28,7 +28,7 @@ import java.util.Optional;
  * corner handles, or locked to a 1:1 aspect ratio.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 public final class CropDialog {

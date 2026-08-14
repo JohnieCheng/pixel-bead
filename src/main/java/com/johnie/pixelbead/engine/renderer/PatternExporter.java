@@ -36,7 +36,7 @@ import java.nio.file.Path;
  * '.' for empty cells.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 public final class PatternExporter {

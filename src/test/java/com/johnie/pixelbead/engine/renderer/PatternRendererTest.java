@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * Tests the AWT pattern renderer and legend layout.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 class PatternRendererTest {

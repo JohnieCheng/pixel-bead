@@ -17,7 +17,7 @@ import java.awt.image.BufferedImage;
  * according to the target DPI.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 public final class PatternRenderer {

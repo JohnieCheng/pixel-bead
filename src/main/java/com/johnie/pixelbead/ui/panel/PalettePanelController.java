@@ -22,7 +22,7 @@ import java.io.IOException;
  * The combo on top switches between bundled palette files.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/11
  */
 public class PalettePanelController {

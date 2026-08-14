@@ -10,7 +10,7 @@ import com.johnie.pixelbead.ui.state.AppState;
  * drives the canvas preview and executes replacements as one undo step.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/11
  */
 public final class ReplaceService {

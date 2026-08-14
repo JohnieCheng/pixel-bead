@@ -7,7 +7,7 @@ package com.johnie.pixelbead.engine.quantizer;
  * perceptually accurate color matching. Pure math, no AWT/JavaFX dependencies.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 public final class ColorSpace {

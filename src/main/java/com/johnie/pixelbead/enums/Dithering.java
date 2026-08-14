@@ -6,7 +6,7 @@ import com.johnie.pixelbead.util.I18n;
  * Error diffusion algorithm used when quantizing.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/13
  */
 public enum Dithering implements I18n.Key {

@@ -6,7 +6,7 @@ import com.johnie.pixelbead.util.I18n;
  * Bundled palette files offered by the palette selector.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/13
  */
 public enum PaletteChoice implements I18n.Key {

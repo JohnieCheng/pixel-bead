@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
  * Factory helpers that remove the anonymous {@link Task} boilerplate.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/11
  */
 public final class TaskUtil {

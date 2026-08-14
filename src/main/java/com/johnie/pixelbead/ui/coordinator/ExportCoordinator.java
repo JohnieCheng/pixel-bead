@@ -21,7 +21,7 @@ import java.nio.file.Path;
  * Owns the export flow: format selection, save dialog, background export task.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/11
  */
 public final class ExportCoordinator {

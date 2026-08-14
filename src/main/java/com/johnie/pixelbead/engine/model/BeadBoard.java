@@ -8,7 +8,7 @@ package com.johnie.pixelbead.engine.model;
  * used by the renderer to draw helper lines.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 public final class BeadBoard {

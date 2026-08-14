@@ -11,7 +11,7 @@ import java.util.Deque;
  * stored snapshots. Keeps at most {@link #LIMIT} snapshots.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/10
  */
 public final class EditHistory {

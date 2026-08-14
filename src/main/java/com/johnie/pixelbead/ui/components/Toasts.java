@@ -14,7 +14,7 @@ import javafx.util.Duration;
  * Non-modal toast and modal error helpers shared across coordinators.
  *
  * @author johnie
- * @version 2.0.0
+ * @version 3.0.0
  * @since 2026/08/11
  */
 public final class Toasts {
