@@ -9,9 +9,6 @@ import com.johnie.pixelbead.ui.state.AppState;
 import com.johnie.pixelbead.util.I18n;
 import javafx.application.Application;
 import javafx.application.Platform;
-
-import java.util.Locale;
-import java.util.ResourceBundle;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -21,6 +18,8 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 /**
  * JavaFX application entry point.
@@ -30,7 +29,9 @@ import java.io.IOException;
  * @since 2026/08/10
  */
 public class MainApplication extends Application {
-    /** Persisted language wins; otherwise the system locale decides. */
+    /**
+     * Persisted language wins; otherwise the system locale decides.
+     */
     private static AppState.Language resolveLanguage(String persisted) {
         if (persisted != null) {
             try {
@@ -62,7 +63,9 @@ public class MainApplication extends Application {
         stage.show();
     }
 
-    /** Applies the language to the shared bundle and state. */
+    /**
+     * Applies the language to the shared bundle and state.
+     */
     public static void applyLanguage(AppState.Language language) {
         AppState.get().languageProperty().set(language);
         I18n.setBundle(ResourceBundle.getBundle("i18n.messages",

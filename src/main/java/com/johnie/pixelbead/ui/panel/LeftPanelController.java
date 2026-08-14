@@ -1,9 +1,8 @@
 package com.johnie.pixelbead.ui.panel;
 
-import com.johnie.pixelbead.engine.BeadEngine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.PatternProject;
-import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import com.johnie.pixelbead.enums.*;
 import com.johnie.pixelbead.ui.state.AppState;
 import com.johnie.pixelbead.util.I18n;
 import javafx.fxml.FXML;
@@ -56,11 +55,11 @@ public class LeftPanelController {
     @FXML
     private ComboBox<Integer> boardRowsCombo;
     @FXML
-    private ComboBox<ImageDownsampler.Interpolation> interpolationCombo;
+    private ComboBox<Interpolation> interpolationCombo;
     @FXML
-    private ComboBox<BeadEngine.Quantization> quantizationCombo;
+    private ComboBox<Quantization> quantizationCombo;
     @FXML
-    private ComboBox<BeadEngine.Dithering> ditheringCombo;
+    private ComboBox<Dithering> ditheringCombo;
     @FXML
     private VBox intensityGroup;
     @FXML
@@ -109,11 +108,11 @@ public class LeftPanelController {
         pickerTool.setToggleGroup(tools);
         tools.selectedToggleProperty().addListener((obs, old, sel) -> {
             if (sel == eraserTool) {
-                state.activeToolProperty().set(AppState.ToolType.ERASER);
+                state.activeToolProperty().set(ToolType.ERASER);
             } else if (sel == pickerTool) {
-                state.activeToolProperty().set(AppState.ToolType.EYEDROPPER);
+                state.activeToolProperty().set(ToolType.EYEDROPPER);
             } else {
-                state.activeToolProperty().set(AppState.ToolType.BRUSH);
+                state.activeToolProperty().set(ToolType.BRUSH);
             }
         });
     }
@@ -224,7 +223,7 @@ public class LeftPanelController {
 
     private void setupInterpolationControl() {
         interpolationCombo.setConverter(I18n.enumConverter());
-        interpolationCombo.getItems().addAll(ImageDownsampler.Interpolation.values());
+        interpolationCombo.getItems().addAll(Interpolation.values());
         interpolationCombo.valueProperty().bindBidirectional(state.interpolationProperty());
     }
 
@@ -233,7 +232,7 @@ public class LeftPanelController {
      */
     private void setupQuantizationControl() {
         quantizationCombo.setConverter(I18n.enumConverter());
-        quantizationCombo.getItems().addAll(BeadEngine.Quantization.values());
+        quantizationCombo.getItems().addAll(Quantization.values());
         quantizationCombo.valueProperty().bindBidirectional(state.quantizationProperty());
         quantizationCombo.valueProperty().addListener((obs, old, quantization) ->
                 applyQuantizationDisables(quantization));
@@ -243,10 +242,10 @@ public class LeftPanelController {
     /**
      * Dithering is meaningless on region-averaged cells.
      */
-    private void applyQuantizationDisables(BeadEngine.Quantization quantization) {
-        boolean average = quantization == BeadEngine.Quantization.AVERAGE;
+    private void applyQuantizationDisables(Quantization quantization) {
+        boolean average = quantization == Quantization.AVERAGE;
         ditheringCombo.setDisable(average);
-        setIntensityVisible(!average && state.ditheringProperty().get() != BeadEngine.Dithering.NONE);
+        setIntensityVisible(!average && state.ditheringProperty().get() != Dithering.NONE);
     }
 
     /**
@@ -254,10 +253,10 @@ public class LeftPanelController {
      */
     private void setupDitheringControls() {
         ditheringCombo.setConverter(I18n.enumConverter());
-        ditheringCombo.getItems().addAll(BeadEngine.Dithering.values());
+        ditheringCombo.getItems().addAll(Dithering.values());
         ditheringCombo.valueProperty().bindBidirectional(state.ditheringProperty());
         ditheringCombo.valueProperty().addListener((obs, old, dithering) ->
-                setIntensityVisible(dithering != BeadEngine.Dithering.NONE));
+                setIntensityVisible(dithering != Dithering.NONE));
 
         intensitySlider.setMin(0);
         intensitySlider.setMax(1);
@@ -266,7 +265,7 @@ public class LeftPanelController {
                 .map(v -> Math.round(v.doubleValue() * 100) + "%"));
 
         setupOrphanControls();
-        setIntensityVisible(state.ditheringProperty().get() != BeadEngine.Dithering.NONE);
+        setIntensityVisible(state.ditheringProperty().get() != Dithering.NONE);
 
         setupMergeControls();
     }
@@ -276,7 +275,7 @@ public class LeftPanelController {
         orphanCombo.getItems().addAll(OrphanLevel.values());
         orphanCombo.valueProperty().addListener((obs, old, level) -> {
             if (level != null) {
-                state.orphanToleranceProperty().set(level.tolerance);
+                state.orphanToleranceProperty().set(level.tolerance());
             }
         });
         orphanCombo.setValue(OrphanLevel.fromTolerance(state.orphanToleranceProperty().get()));
@@ -288,8 +287,8 @@ public class LeftPanelController {
         // ComboBox item is the enum; sync its value to the primitive property.
         mergeCombo.valueProperty().addListener((obs, old, preset) -> {
             if (preset != null) {
-                state.mergeThresholdProperty().set(preset.threshold);
-                setMinShareVisible(preset.threshold > 0);
+                state.mergeThresholdProperty().set(preset.threshold());
+                setMinShareVisible(preset.threshold() > 0);
             }
         });
         mergeCombo.setValue(MergePreset.fromThreshold(state.mergeThresholdProperty().get()));
@@ -360,75 +359,5 @@ public class LeftPanelController {
         redoButton.setDisable(!state.editHistory().canRedo());
     }
 
-    /**
-     * Orphan cleaning strength: Off / Light / Medium / Strong.
-     */
-    private enum OrphanLevel implements I18n.Key {
-        OFF(0), LIGHT(1), MEDIUM(2), STRONG(3);
 
-        /**
-         * Full key prefix: enum.orphanlevel.
-         */
-        private static final String KEY_PREFIX = "enum.orphanlevel.";
-        private final int tolerance;
-
-        OrphanLevel(int tolerance) {
-            this.tolerance = tolerance;
-        }
-
-        static OrphanLevel fromTolerance(int tolerance) {
-            for (OrphanLevel level : values()) {
-                if (level.tolerance == tolerance) {
-                    return level;
-                }
-            }
-            return OFF;
-        }
-
-        /**
-         * i18n key, e.g. {@code enum.orphanlevel.medium}.
-         */
-        @Override
-        public String getI18nKey() {
-            return KEY_PREFIX + name().toLowerCase();
-        }
-    }
-
-    /**
-     * Colour merge presets and the low-frequency share threshold.
-     */
-    private enum MergePreset implements I18n.Key {
-        OFF(0.0),
-        CONSERVATIVE(2.0),
-        STANDARD(4.0),
-        AGGRESSIVE(7.0),
-        EXTREME(12.0);
-
-        /**
-         * Full key prefix: enum.mergepreset.
-         */
-        private static final String KEY_PREFIX = "enum.mergepreset.";
-        private final double threshold;
-
-        MergePreset(double threshold) {
-            this.threshold = threshold;
-        }
-
-        static MergePreset fromThreshold(double threshold) {
-            for (MergePreset preset : values()) {
-                if (preset.threshold == threshold) {
-                    return preset;
-                }
-            }
-            return OFF;
-        }
-
-        /**
-         * i18n key, e.g. {@code enum.mergepreset.aggressive}.
-         */
-        @Override
-        public String getI18nKey() {
-            return KEY_PREFIX + name().toLowerCase();
-        }
-    }
 }

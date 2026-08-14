@@ -14,10 +14,14 @@ import java.util.ResourceBundle;
  */
 public final class I18n {
 
-    /** Implemented by enums that carry a translation key. */
+    /**
+     * Implemented by enums that carry a translation key.
+     */
     public interface Key {
 
-        /** Translation key, e.g. {@code enum.orphanlevel.medium}. */
+        /**
+         * Translation key, e.g. {@code enum.orphanlevel.medium}.
+         */
         String getI18nKey();
     }
 
@@ -27,7 +31,9 @@ public final class I18n {
     private I18n() {
     }
 
-    /** Replaces the active bundle (e.g. after a language preference change). */
+    /**
+     * Replaces the active bundle (e.g. after a language preference change).
+     */
     public static void setBundle(ResourceBundle newBundle) {
         bundle = newBundle;
     }
@@ -36,7 +42,9 @@ public final class I18n {
         return bundle;
     }
 
-    /** Returns the translated string; falls back to the key when missing. */
+    /**
+     * Returns the translated string; falls back to the key when missing.
+     */
     public static String get(String key) {
         try {
             return bundle.getString(key);
@@ -45,7 +53,9 @@ public final class I18n {
         }
     }
 
-    /** Formatted message ({0}, {1} placeholders). */
+    /**
+     * Formatted message ({0}, {1} placeholders).
+     */
     public static String format(String key, Object... args) {
         return MessageFormat.format(get(key), args);
     }

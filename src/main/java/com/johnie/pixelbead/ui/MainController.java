@@ -1,8 +1,9 @@
 package com.johnie.pixelbead.ui;
 
 import com.johnie.pixelbead.MainApplication;
+import com.johnie.pixelbead.enums.ExportFormat;
+import com.johnie.pixelbead.enums.Theme;
 import com.johnie.pixelbead.ui.components.InteractiveCanvas;
-import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.coordinator.ConversionCoordinator;
 import com.johnie.pixelbead.ui.coordinator.ExportCoordinator;
 import com.johnie.pixelbead.ui.coordinator.ReplaceService;
@@ -40,7 +41,7 @@ public class MainController {
     @FXML
     private Button exportButton;
     @FXML
-    private ComboBox<ExportCoordinator.ExportFormat> formatCombo;
+    private ComboBox<ExportFormat> formatCombo;
     @FXML
     private InteractiveCanvas canvas;
     @FXML
@@ -141,9 +142,9 @@ public class MainController {
 
     @FXML
     private void onToggleTheme() {
-        AppState.Theme next = state.themeProperty().get() == AppState.Theme.DARK
-                ? AppState.Theme.LIGHT
-                : AppState.Theme.DARK;
+        Theme next = state.themeProperty().get() == Theme.DARK
+                ? Theme.LIGHT
+                : Theme.DARK;
         state.themeProperty().set(next);
     }
 
@@ -154,26 +155,21 @@ public class MainController {
 
     private void setupTheme() {
         applyThemeClass();
-        themeButton.setText(state.themeProperty().get() == AppState.Theme.DARK ? "Dark" : "Light");
+        themeButton.setText(state.themeProperty().get() == Theme.DARK ? "Dark" : "Light");
         state.themeProperty().addListener((obs, old, theme) -> {
             applyThemeClass();
-            themeButton.setText(theme == AppState.Theme.DARK ? "Dark" : "Light");
+            themeButton.setText(theme == Theme.DARK ? "Dark" : "Light");
         });
     }
 
     private void applyThemeClass() {
         root.getStyleClass().removeAll("theme-dark", "theme-light");
-        root.getStyleClass().add(state.themeProperty().get() == AppState.Theme.DARK ? "theme-dark" : "theme-light");
+        root.getStyleClass().add(state.themeProperty().get() == Theme.DARK ? "theme-dark" : "theme-light");
     }
 
     @FXML
     private void onImportImage() {
         conversion.importImage();
-    }
-
-    @FXML
-    private void onAutoSettings() {
-        conversion.applyRecommendedSettings();
     }
 
     /**

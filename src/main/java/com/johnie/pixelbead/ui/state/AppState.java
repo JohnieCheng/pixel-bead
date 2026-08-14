@@ -1,10 +1,9 @@
 package com.johnie.pixelbead.ui.state;
 
-import com.johnie.pixelbead.engine.BeadEngine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
-import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import com.johnie.pixelbead.enums.*;
 import javafx.beans.property.*;
 
 /**
@@ -19,7 +18,9 @@ import javafx.beans.property.*;
  */
 public final class AppState {
 
-    /** UI language; native names are shown untranslated. */
+    /**
+     * UI language; native names are shown untranslated.
+     */
     public enum Language {
         ZH("中文"), EN("English");
 
@@ -40,8 +41,8 @@ public final class AppState {
     private final ObjectProperty<BeadBoard> board = new SimpleObjectProperty<>(BeadBoard.MINI_STANDARD);
     private final ObjectProperty<Integer> boardColumns = new SimpleObjectProperty<>(1);
     private final ObjectProperty<Integer> boardRows = new SimpleObjectProperty<>(1);
-    private final ObjectProperty<ImageDownsampler.Interpolation> interpolation =
-            new SimpleObjectProperty<>(ImageDownsampler.Interpolation.BILINEAR);
+    private final ObjectProperty<Interpolation> interpolation =
+            new SimpleObjectProperty<>(Interpolation.BILINEAR);
     private final ObjectProperty<PatternProject> currentProject = new SimpleObjectProperty<>();
     /**
      * Currently selected palette index (the brush color).
@@ -67,13 +68,13 @@ public final class AppState {
      * How a board cell picks its colour: nearest sample or region average.
      * Region average is the default: it smooths noise and keeps patterns clean.
      */
-    private final ObjectProperty<BeadEngine.Quantization> quantization =
-            new SimpleObjectProperty<>(BeadEngine.Quantization.AVERAGE);
+    private final ObjectProperty<Quantization> quantization =
+            new SimpleObjectProperty<>(Quantization.AVERAGE);
     /**
      * Error diffusion algorithm used when quantizing.
      */
-    private final ObjectProperty<BeadEngine.Dithering> dithering =
-            new SimpleObjectProperty<>(BeadEngine.Dithering.NONE);
+    private final ObjectProperty<Dithering> dithering =
+            new SimpleObjectProperty<>(Dithering.NONE);
     /**
      * Error diffusion share in [0,1]; 0 disables the diffusion effect.
      * Advanced parameters default to off; users opt in via the panel.
@@ -130,7 +131,7 @@ public final class AppState {
         return boardRows;
     }
 
-    public ObjectProperty<ImageDownsampler.Interpolation> interpolationProperty() {
+    public ObjectProperty<Interpolation> interpolationProperty() {
         return interpolation;
     }
 
@@ -158,11 +159,11 @@ public final class AppState {
         return replaceFromIndex;
     }
 
-    public ObjectProperty<BeadEngine.Dithering> ditheringProperty() {
+    public ObjectProperty<Dithering> ditheringProperty() {
         return dithering;
     }
 
-    public ObjectProperty<BeadEngine.Quantization> quantizationProperty() {
+    public ObjectProperty<Quantization> quantizationProperty() {
         return quantization;
     }
 
@@ -224,17 +225,5 @@ public final class AppState {
         editCount.set(0);
     }
 
-    /**
-     * Editing tools.
-     */
-    public enum ToolType {
-        BRUSH, ERASER, EYEDROPPER
-    }
 
-    /**
-     * Color themes; the UI root carries the matching CSS class.
-     */
-    public enum Theme {
-        DARK, LIGHT
-    }
 }

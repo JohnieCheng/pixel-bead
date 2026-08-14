@@ -4,6 +4,7 @@ import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
+import com.johnie.pixelbead.enums.Theme;
 import com.johnie.pixelbead.ui.state.AppState;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.IntegerProperty;
@@ -144,8 +145,8 @@ public class InteractiveCanvas extends Canvas {
         applyTheme(state.themeProperty().get());
     }
 
-    private void applyTheme(AppState.Theme theme) {
-        Color[] palette = theme == AppState.Theme.LIGHT ? LIGHT : DARK;
+    private void applyTheme(Theme theme) {
+        Color[] palette = theme == Theme.LIGHT ? LIGHT : DARK;
         bg = palette[0];
         cellLine = palette[1];
         subGridLine = palette[2];

@@ -1,7 +1,17 @@
 package com.johnie.pixelbead.util;
+import com.johnie.pixelbead.enums.Dithering;
+import com.johnie.pixelbead.enums.Quantization;
+import com.johnie.pixelbead.enums.Interpolation;
 
 import com.johnie.pixelbead.engine.BeadEngine;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
+import com.johnie.pixelbead.enums.Dithering;
+import com.johnie.pixelbead.enums.ExportFormat;
+import com.johnie.pixelbead.enums.Interpolation;
+import com.johnie.pixelbead.enums.MergePreset;
+import com.johnie.pixelbead.enums.OrphanLevel;
+import com.johnie.pixelbead.enums.PaletteChoice;
+import com.johnie.pixelbead.enums.Quantization;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -40,9 +50,14 @@ class I18nTest {
 
     private static I18n.Key[] keys() {
         return new I18n.Key[]{
-                BeadEngine.Dithering.NONE, BeadEngine.Dithering.FLOYD_STEINBERG, BeadEngine.Dithering.ATKINSON,
-                BeadEngine.Quantization.NEAREST, BeadEngine.Quantization.AVERAGE,
-                ImageDownsampler.Interpolation.NEAREST, ImageDownsampler.Interpolation.BILINEAR,
+                Dithering.NONE, Dithering.FLOYD_STEINBERG, Dithering.ATKINSON,
+                Quantization.NEAREST, Quantization.AVERAGE,
+                Interpolation.NEAREST, Interpolation.BILINEAR,
+                OrphanLevel.OFF, OrphanLevel.LIGHT, OrphanLevel.MEDIUM, OrphanLevel.STRONG,
+                MergePreset.OFF, MergePreset.CONSERVATIVE, MergePreset.STANDARD,
+                MergePreset.AGGRESSIVE, MergePreset.EXTREME,
+                ExportFormat.PNG, ExportFormat.PDF, ExportFormat.TEXT,
+                PaletteChoice.STANDARD_221, PaletteChoice.FULL_291,
         };
     }
 }

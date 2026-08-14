@@ -2,6 +2,7 @@ package com.johnie.pixelbead.ui.coordinator;
 
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.renderer.PatternExporter;
+import com.johnie.pixelbead.enums.ExportFormat;
 import com.johnie.pixelbead.ui.components.InteractiveCanvas;
 import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.state.AppState;
@@ -113,19 +114,4 @@ public final class ExportCoordinator {
         loadingOverlay.setManaged(false);
     }
 
-    /**
-     * Supported export formats.
-     */
-    public enum ExportFormat implements I18n.Key {
-        PNG, PDF, TEXT;
-
-        /** Full key prefix: enum.exportformat. */
-        private static final String KEY_PREFIX = "enum.exportformat.";
-
-        /** i18n key, e.g. {@code enum.exportformat.text}. */
-        @Override
-        public String getI18nKey() {
-            return KEY_PREFIX + name().toLowerCase();
-        }
-    }
 }

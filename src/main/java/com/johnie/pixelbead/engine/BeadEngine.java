@@ -5,7 +5,9 @@ import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ColorDifference;
 import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
-import com.johnie.pixelbead.util.I18n;
+import com.johnie.pixelbead.enums.Dithering;
+import com.johnie.pixelbead.enums.Interpolation;
+import com.johnie.pixelbead.enums.Quantization;
 
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -29,49 +31,16 @@ import java.util.Map;
  */
 public final class BeadEngine {
 
-    /** Alpha below this value is treated as transparent (empty cell). */
+    /**
+     * Alpha below this value is treated as transparent (empty cell).
+     */
     private static final int ALPHA_OPAQUE_THRESHOLD = 128;
 
-    /** Error diffusion algorithm used when quantizing. */
-    public enum Dithering implements I18n.Key {
-        /** Plain nearest-colour mapping (pixel art / flat areas). */
-        NONE,
-        /** Floyd-Steinberg: error spread to 4 neighbours (7/16, 3/16, 5/16, 1/16). */
-        FLOYD_STEINBERG,
-        /** Atkinson: gentler error spread to 6 neighbours (1/8 each), less noise. */
-        ATKINSON;
-
-        /** Full key prefix: enum.dithering. */
-        private static final String KEY_PREFIX = "enum.dithering.";
-
-        /** i18n key, e.g. {@code enum.dithering.floyd_steinberg}. */
-        @Override
-        public String getI18nKey() {
-            return KEY_PREFIX + name().toLowerCase();
-        }
-    }
 
     /**
-     * How a board cell picks its colour from the source.
+     * All conversion knobs, grouped.
      */
-    public enum Quantization implements I18n.Key {
-        /** Sample the interpolated source pixel (current behaviour). */
-        NEAREST,
-        /** Average the whole source region covered by the cell (anti-noise). */
-        AVERAGE;
-
-        /** Full key prefix: enum.quantization. */
-        private static final String KEY_PREFIX = "enum.quantization.";
-
-        /** i18n key, e.g. {@code enum.quantization.average}. */
-        @Override
-        public String getI18nKey() {
-            return KEY_PREFIX + name().toLowerCase();
-        }
-    }
-
-    /** All conversion knobs, grouped. */
-    public record ConversionOptions(ImageDownsampler.Interpolation interpolation,
+    public record ConversionOptions(Interpolation interpolation,
                                     Quantization quantization,
                                     Dithering dithering,
                                     double ditheringStrength,
@@ -93,7 +62,7 @@ public final class BeadEngine {
             }
         }
 
-        public static ConversionOptions plain(ImageDownsampler.Interpolation interpolation) {
+        public static ConversionOptions plain(Interpolation interpolation) {
             return new ConversionOptions(interpolation, Quantization.NEAREST, Dithering.NONE, 1.0, 0, 0.0, 1);
         }
     }
@@ -111,7 +80,7 @@ public final class BeadEngine {
      * @return pattern project with the color-index grid
      */
     public static PatternProject processImage(BufferedImage src, BeadBoard board, BeadPalette palette,
-                                              ImageDownsampler.Interpolation mode) {
+                                              Interpolation mode) {
         return processImage(src, board, palette, ConversionOptions.plain(mode));
     }
 
@@ -384,7 +353,9 @@ public final class BeadEngine {
         return grid;
     }
 
-    /** Adds a weighted share of the error to each listed neighbour (dx, dy, weight triples). */
+    /**
+     * Adds a weighted share of the error to each listed neighbour (dx, dy, weight triples).
+     */
     private static void spread(double[][][] error, int gridW, int gridH, int x, int y,
                                double dr, double dg, double db, double weight, int... offsets) {
         for (int i = 0; i + 2 < offsets.length; i += 3) {
@@ -450,7 +421,9 @@ public final class BeadEngine {
         return cleaned;
     }
 
-    /** Most frequent value in the first {@code count} entries. */
+    /**
+     * Most frequent value in the first {@code count} entries.
+     */
     private static int modeOf(int[] values, int count) {
         int best = values[0];
         int bestCount = 1;

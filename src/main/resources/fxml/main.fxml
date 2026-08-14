@@ -9,7 +9,6 @@
     <top>
         <ToolBar>
             <Button fx:id="importButton" text="%button.importImage" onAction="#onImportImage"/>
-            <Button fx:id="autoButton" text="%button.auto" onAction="#onAutoSettings"/>
             <Separator/>
             <ComboBox fx:id="formatCombo" prefWidth="90"/>
             <Button fx:id="exportButton" text="%button.export" onAction="#onExport" disable="true"/>

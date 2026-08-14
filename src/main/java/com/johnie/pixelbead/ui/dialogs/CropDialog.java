@@ -1,5 +1,6 @@
 package com.johnie.pixelbead.ui.dialogs;
 
+import com.johnie.pixelbead.enums.Theme;
 import com.johnie.pixelbead.ui.state.AppState;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -183,7 +184,7 @@ public final class CropDialog {
         // dialog's own scene (it is not a child of the main window's root).
         AppState state = AppState.get();
         root.getStyleClass().addAll("root", "crop-dialog",
-                state.themeProperty().get() == AppState.Theme.DARK ? "theme-dark" : "theme-light");
+                state.themeProperty().get() == Theme.DARK ? "theme-dark" : "theme-light");
 
         Mode[] mode = {Mode.NONE};
         double[] anchor = {0, 0};

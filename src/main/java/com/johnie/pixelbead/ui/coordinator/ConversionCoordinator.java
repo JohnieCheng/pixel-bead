@@ -4,9 +4,7 @@ import com.johnie.pixelbead.engine.BeadEngine;
 import com.johnie.pixelbead.engine.model.BeadBoard;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
-import com.johnie.pixelbead.engine.quantizer.ImageDownsampler;
-import com.johnie.pixelbead.engine.recommend.ConversionRecommender;
-import com.johnie.pixelbead.engine.recommend.ConversionRecommender.RecommendedSettings;
+import com.johnie.pixelbead.enums.Interpolation;
 import com.johnie.pixelbead.ui.components.Toasts;
 import com.johnie.pixelbead.ui.dialogs.CropDialog;
 import com.johnie.pixelbead.ui.state.AppState;
@@ -109,32 +107,6 @@ public final class ConversionCoordinator {
     }
 
     /**
-     * Analyses the current image and applies the recommended conversion
-     * settings (manual Auto button). Each property change re-runs the
-     * conversion via its listener.
-     */
-    public void applyRecommendedSettings() {
-        if (sourceImage == null) {
-            return;
-        }
-        RecommendedSettings rec = ConversionRecommender.recommend(sourceImage);
-        state.interpolationProperty().set(rec.interpolation());
-        state.ditheringProperty().set(rec.dithering());
-        state.ditheringStrengthProperty().set(rec.ditheringStrength());
-        state.orphanToleranceProperty().set(rec.orphanTolerance());
-        state.mergeThresholdProperty().set(rec.mergeThreshold());
-        Toasts.show(importButton, I18n.format("toast.autoDetected", describe(rec), rec.mergeThreshold()));
-    }
-
-    private static String describe(RecommendedSettings rec) {
-        return switch (rec.dithering()) {
-            case NONE -> I18n.get("toast.ditherNone");
-            case FLOYD_STEINBERG -> I18n.get("toast.ditherFloyd");
-            case ATKINSON -> I18n.get("toast.ditherAtkinson");
-        };
-    }
-
-    /**
      * Runs the conversion pipeline on a background thread. A stale task is
      * cancelled first and results from superseded generations are discarded,
      * so rapid parameter changes always land on the latest settings.
@@ -153,7 +125,7 @@ public final class ConversionCoordinator {
         int rows = board.rows(state.boardRowsProperty().get());
         BeadBoard effectiveBoard = new BeadBoard(cols, rows, board.beadSizeMm(), board.subGridInterval());
         BeadPalette palette = state.paletteProperty().get();
-        ImageDownsampler.Interpolation interpolation = state.interpolationProperty().get();
+        Interpolation interpolation = state.interpolationProperty().get();
         BufferedImage source = sourceImage;
 
         BeadEngine.ConversionOptions options = new BeadEngine.ConversionOptions(

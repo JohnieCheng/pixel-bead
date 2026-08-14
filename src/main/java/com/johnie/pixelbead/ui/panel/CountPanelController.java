@@ -4,6 +4,7 @@ import com.johnie.pixelbead.engine.model.BeadColor;
 import com.johnie.pixelbead.engine.model.BeadPalette;
 import com.johnie.pixelbead.engine.model.PatternProject;
 import com.johnie.pixelbead.engine.quantizer.ColorDifference;
+import com.johnie.pixelbead.enums.Theme;
 import com.johnie.pixelbead.ui.coordinator.ReplaceService;
 import com.johnie.pixelbead.ui.model.BeadCountRow;
 import com.johnie.pixelbead.ui.state.AppState;
@@ -134,7 +135,7 @@ public class CountPanelController {
         // Popup content lives outside the main root: carry the theme classes
         // so -pixel-* variables resolve (same pattern as CropDialog).
         box.getStyleClass().addAll("root", "replace-picker",
-                state.themeProperty().get() == AppState.Theme.DARK ? "theme-dark" : "theme-light");
+                state.themeProperty().get() == Theme.DARK ? "theme-dark" : "theme-light");
         Label header = new Label(source.color().code() + " \u00b7 " + source.count() + " beads");
         header.getStyleClass().add("replace-picker-header");
         box.getChildren().add(header);
