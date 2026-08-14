@@ -5,18 +5,24 @@
 ## 功能
 
 - **图片 → 拼豆图纸**：导入 PNG/JPG/GIF/BMP，等比缩放居中，CIEDE2000 感知色差匹配到色板最近色
-- **底板配置**：Mard 标准板（2.6mm 50×50 / 29×29，5.0mm 29×29 / 14×14），板数拼接（1×1 ~ 4×4）
+- **底板配置**：Mard 标准板（2.6mm 50×50 / 29×29，5.0mm 29×29 / 14×14），自定义板（≤200×200），板数拼接（1×1 ~ 4×4）
+- **Pixel mode**：平均色（默认，区域积分抗噪）/ 最近色
 - **插值模式**：Bilinear（照片）/ Nearest（像素风）
-- **图纸查看**：滚轮缩放、空格/中键拖拽平移、子网格加粗线、悬停显示坐标与色号、窗口缩放实时适配
-- **导入与裁剪**：PNG/JPG/GIF/BMP，导入时裁剪选区（拖拽/四边四角调整/锁定 1:1），只转换选中区域
-- **编辑**：画笔 / 橡皮 / 吸管工具，色板点击选色，撤销/重做（Cmd+Z / Cmd+Shift+Z），用量统计实时刷新
+- **抖动**：Floyd-Steinberg / Atkinson + 强度调节（Average 模式自动禁用）
+- **孤立点清理**：Off / Light / Medium / Strong 四档
+- **相似色合并**：ΔE2000 五档（2/4/7/12）+ 最小占比（相对 %），合并相近低频色
+- **色盘选择**：Mard 标准 221 色 / 全色 291 色（右侧面板下拉）
+- **多语言**：中文 / English 一键切换（状态栏右下角，即时生效）
+- **图纸查看**：滚轮/触控板捏合缩放、空格+左键 / 右键 / 中键 / 无工具左键 / 双指平移、子网格加粗线（间隔自适应板尺寸）、悬停显示坐标与色号
+- **导入与裁剪**：导入时裁剪选区（拖拽/四边四角调整/锁定 1:1），只转换选中区域
+- **编辑**：画笔 / 橡皮 / 吸管工具（默认不选中），色板点击选色，撤销/重做（Cmd+Z / Cmd+Shift+Z），用量统计实时刷新
 - **批量替换色块**：统计表悬浮脉冲高亮定位；右键显示相近色（ΔE2000）或从色板选目标色，实时预览替换效果，一步撤销
 - **预览模式**：隐藏网格线显示成品效果（工具栏 Preview 或快捷键 P）
-- **主题**：深色 / 浅色一键切换（工具栏按钮，默认浅色）
+- **主题**：深色 / 浅色一键切换（默认浅色），现代 ins 风格 UI（圆角/阴影/蓝紫 accent）
 - **用量统计**：按色号统计珠子数量，降序列表
 - **导出**：
   - PNG（300 DPI，1:1 物理尺寸，色块+色号标注+坐标轴+图例）
-  - PDF（PDFBox 单页，物理尺寸精确）
+  - PDF（物理尺寸单页；自定义板子网格间隔 ≥2 时输出**多板 Tiling 图纸**：总览页 + 每块一页 A4，页眉标注板号与行列范围，占满居中）
   - Text（色号矩阵，`.` 表示空格）
 
 ## 技术栈
@@ -75,21 +81,26 @@ git tag v1.0.0 && git push origin v1.0.0
 engine/         核心引擎层（纯 Java + AWT，无 JavaFX 依赖）
   model/        BeadBoard / BeadColor / BeadPalette / PatternProject
   quantizer/    ColorSpace (sRGB→Lab) / ColorDifference (ΔE2000) / ImageDownsampler
-  renderer/     PatternRenderer (离线图纸) / PatternExporter (PNG/PDF/Text)
-  BeadEngine    转换管线：降采样 → 量化 → PatternProject
+  renderer/     PatternRenderer (离线图纸) / PatternExporter (PNG/PDF/Text/多板Tiling)
+  BeadEngine    转换管线：降采样 → 量化 → 清理/合并 → PatternProject
+enums/          枚举集中管理（Dithering/Quantization/Interpolation/OrphanLevel/
+                MergePreset/ExportFormat/PaletteChoice/ToolType/Theme，实现 I18n.Key）
 ui/             视图控制层
   state/AppState        全局状态（ObjectProperty 响应式）
-  components/InteractiveCanvas  无限视口 Canvas（缩放/平移/悬停）
+  components/InteractiveCanvas  无限视口 Canvas（缩放/平移/悬停/编辑）
   MainController        布局控制器
 resources/
-  palettes/mard_standard.json   色板数据
+  palettes/             mard_standard.json (291) / mard_standard_221.json (221)
+  i18n/                 messages*.properties（中英双语）
   fxml/main.fxml + css/style.css
 ```
 
 ## 色板说明
 
-`src/main/resources/palettes/mard_standard.json` 为 **Mard 真实色板（291 色，来源 mard.csv，数据来自 [maxcleme/beadcolors](https://github.com/maxcleme/beadcolors)）**。schema：
+- `palettes/mard_standard.json` — **Mard 全色 291**（221 标准 A-H+M + 70 扩展）
+- `palettes/mard_standard_221.json` — **Mard 标准 221**（A-H+M 九系列，官网 Standard range）
+- 数据源：官网 pixel-beads.com（经 maxcleme/beadcolors 仓库整理），schema：
 
 ```json
-{ "brand": "Mard", "colors": [ { "code": "A1", "name": "", "rgb": [250, 244, 200] } ] }
+{ "brand": "Mard", "range": "standard-221", "colors": [ { "code": "A1", "hex": "#FAF4C8", "rgb": [250, 244, 200] } ] }
 ```
